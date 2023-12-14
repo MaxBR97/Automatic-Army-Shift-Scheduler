@@ -1,0 +1,27 @@
+{
+  "name": "automatic-army-shift-scheduler",
+  "version": "1.0.0",
+  "description": "This Project automatically scheduels patrol shifts for my army unit during Iron Swords War, using a polynomial algorithm which solves a Linear Problem.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "Linear",
+    "Problem",
+    "Shifts",
+    "Algorithm"
+  ],
+  "author": "Max",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "fs": "^0.0.1-security",
+    "javascript-lp-solver": "^0.4.24",
+    "mathjs": "^12.2.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
