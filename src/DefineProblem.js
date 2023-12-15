@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,11 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require('fs');
 const path = require('path');
+const axios_1 = __importDefault(require("axios"));
 // Assuming the data.json file is in the 'data' directory
 const filePath = path.join(__dirname, '..', 'config.json');
 const outputFile = 'output.json';
+Date.prototype.toString = function () {
+    return this.toLocaleString();
+};
+Date.prototype.toJSON = function () {
+    return this.toLocaleString();
+};
 let planUntil = new Date();
 let planFrom = new Date();
 let patrolIntervals; //in minutes
@@ -30,8 +42,8 @@ crewToValueIndex.set("2b", 11);
 let problem = {
     variables: {},
     coefficients: {},
-    constraints: {},
-    objective: {}
+    constraints: [],
+    objective: ''
 };
 function parseConfigurationFile() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -52,15 +64,6 @@ function parseConfigurationFile() {
                         until: stringToDateTimeParser(jsonData.nightPatrolTime.until)
                     };
                     problem.variables["z"] = quantizeTime(planFrom, planUntil, patrolIntervals);
-                    problem.variables["z"].map((patrolTime) => {
-                        problem.variables["z"]["solela"] = [];
-                    });
-                    shinGimelTimes = jsonData.shinGimelTimes.forEach(element => {
-                        problem.variables["z"].map((patrolTime) => {
-                            problem.variables["z"]["shinGimel"] = isInFullDateRange(element.from, element.until, patrolTime.time) ? [] : undefined;
-                        });
-                    });
-                    ;
                     //TODO: readyWithDawnTimes
                     readyWithDawnTime = stringToDateTimeParser(jsonData.readyWithDawnTime);
                     problem.coefficients["k"] = [];
@@ -68,18 +71,22 @@ function parseConfigurationFile() {
                     problem.coefficients["t"] = [];
                     problem.coefficients["s"] = [];
                     jsonData.soldiers.forEach((soldier, i) => {
-                        indexToNameMap[i] = soldier.name;
-                        nameToIndexMap[soldier.name] = i;
-                        problem.variables["z"].map((patrolTime) => {
+                        indexToNameMap.set(i, soldier.name);
+                        nameToIndexMap.set(soldier.name, i);
+                        problem.coefficients["k"][i] = [];
+                        problem.coefficients["m"][i] = [];
+                        problem.variables["z"].map((patrolTime, j) => {
                             soldier.commanderTimes.map((commanderTime) => {
-                                problem.coefficients["k"][i] = [];
-                                problem.coefficients["k"][i][patrolTime.time] = isInFullDateRange(commanderTime.from, commanderTime.until, patrolTime.time) ? 1 : 0;
+                                commanderTime.from = stringToDateTimeParser(commanderTime.from);
+                                commanderTime.until = stringToDateTimeParser(commanderTime.until);
+                                problem.coefficients["k"][i][j] = isInFullDateRange(commanderTime.from, commanderTime.until, patrolTime.time) ? 1 : 0;
                             });
                         });
                         problem.variables["z"].forEach((patrolTime) => {
-                            soldier.presentDates.map((presentTime) => {
-                                problem.coefficients["m"][i] = [];
-                                problem.coefficients["m"][i][patrolTime.time] = isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time) ? 1 : 0;
+                            soldier.presentDates.map((presentTime, j) => {
+                                presentTime.from = stringToDateTimeParser(presentTime.from);
+                                presentTime.until = stringToDateTimeParser(presentTime.until);
+                                problem.coefficients["m"][i][j] = isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time) ? 1 : 0;
                             });
                         });
                         problem.coefficients["t"][i] = crewToValueIndex.get(soldier.crew);
@@ -87,7 +94,6 @@ function parseConfigurationFile() {
                     });
                     jsonData.history.solela.forEach((entry) => {
                         let index = nameToIndexMap[entry.name];
-                        console.log("fgsa ", index);
                         if (index >= 0) {
                             let hold = historyEvaluationMap[index];
                             if (!hold) {
@@ -98,7 +104,6 @@ function parseConfigurationFile() {
                             let curNight = hold.night ? hold.night : 0;
                             isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
                         }
-                        console.log(historyEvaluationMap);
                     });
                     jsonData.history.shinGimel.forEach((entry) => {
                         let index = nameToIndexMap[entry.name];
@@ -113,7 +118,71 @@ function parseConfigurationFile() {
                             isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
                         }
                     });
-                    console.log("finished parsing config file");
+                    if (!problem.constraints) {
+                        problem.constraints = []; // Initialize constraints array if not already initialized
+                    }
+                    problem.variables["z"].map((patrolTime, j) => {
+                        //solelaPatrolSoldiersAmount(j);
+                        //shinGimelSoldiersAmount(j);
+                        for (var i = 0; i < nameToIndexMap.size; i++) {
+                            commanderDontDoPatrols(j, i);
+                            MTOrMedicDontDoShinGimelConstraint(j, i);
+                            //twoFromSameTeamInShinGimelNotAllowed(j, i);
+                            //soldierAllowedToBeAtMaximumOneStationAtOnce(j,i);
+                            for (var k = 0; k <= 1; k++) {
+                                soldierPresencyConstraint(j, k, i);
+                            }
+                        }
+                    });
+                    problem.objective = ``;
+                    console.log(nameToIndexMap.size);
+                    nameToIndexMap.forEach((i, soldierName) => {
+                        let dayExpression = ``;
+                        let nightExpression = ``;
+                        let dayHistory = 0;
+                        let nightHistory = 0;
+                        if (historyEvaluationMap.get(i)) {
+                            dayHistory = historyEvaluationMap[i].day;
+                            nightHistory = historyEvaluationMap[i].night;
+                        }
+                        console.log(" ", " ", i);
+                        problem.variables["z"].map((patrolTime, j) => {
+                            for (let k = 0; k <= 1; k++) {
+                                if (isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, patrolTime.time)) {
+                                    nightExpression = nightExpression.concat(`z[${j}][${k}][${i}] +`);
+                                }
+                                else {
+                                    dayExpression = dayExpression.concat(`z[${j}][${k}][${i}] +`);
+                                }
+                            }
+                        });
+                        let dayExpExists = false, nightExpExists = false;
+                        ;
+                        if (dayExpression.length != 0) {
+                            dayExpression = dayExpression.concat(`${dayHistory}`);
+                            dayExpression = `(`.concat(dayExpression).concat(`) ** 2`);
+                            dayExpExists = true;
+                        }
+                        if (nightExpression.length != 0) {
+                            nightExpression = nightExpression.concat(`${nightHistory}`);
+                            nightExpression = `(`.concat(nightExpression).concat(`) ** 3`);
+                            nightExpExists = true;
+                        }
+                        let totalExpForSoldier = ``;
+                        if (dayExpExists && nightExpExists) {
+                            totalExpForSoldier = dayExpression.concat(` + `).concat(nightExpression);
+                        }
+                        else {
+                            totalExpForSoldier = dayExpression.concat(nightExpression);
+                        }
+                        if (problem.objective.length == 0) {
+                            problem.objective = totalExpForSoldier;
+                        }
+                        else {
+                            problem.objective = problem.objective.concat(` + `).concat(totalExpForSoldier);
+                        }
+                    });
+                    console.log("Finished parsing config file");
                     resolve();
                 }
                 catch (error) {
@@ -163,13 +232,61 @@ function writeObjectToFile(objectData, filePath) {
         console.error('Error writing to file:', error);
     }
 }
-Date.prototype.toString = function () {
-    return this.toLocaleString();
-};
-Date.prototype.toJSON = function () {
-    return this.toLocaleString();
-};
+function solveBinaryOptimizationProblem(optProblem) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // const optimizationProblem = {
+        //     objective: 'x[0][0][0] + x[1][1][1] + x[2][2][2]', // Objective function with a 3D matrix of binary variables
+        //     constraints: [
+        //         'x[0][0][0] + x[1][1][1] >= 1', // Constraint 1
+        //         'x[1][1][1] + x[2][2][2] >= 1', // Constraint 2
+        //         'x[0][0][0] != x[1][1][1]',    // Not equal constraint between x[0][0][0] and x[1][1][1]
+        //         // Add more constraints here as needed
+        //     ]
+        // };
+        try {
+            const response = yield axios_1.default.get('http://localhost:5003/solve_optimization');
+            console.log('Optimization solution:', response.data);
+        }
+        catch (error) {
+            console.error('Error solving binary optimization problem:', error);
+        }
+    });
+}
+function MTOrMedicDontDoShinGimelConstraint(timeIndex, soldierIndex) {
+    problem.constraints.push(`z[${timeIndex}][1][${soldierIndex}] * ${problem.coefficients["s"][soldierIndex]} <= 0`);
+}
+function soldierPresencyConstraint(timeIndex, stationIndex, soldierIndex) {
+    for (var k = 0; k <= 1; k++) {
+        problem.constraints.push(`z[${timeIndex}][${k}][${soldierIndex}]  <= ${problem.coefficients["m"][soldierIndex][timeIndex] ? problem.coefficients["m"][soldierIndex][timeIndex] : 0}`);
+    }
+}
+function commanderDontDoPatrols(timeIndex, soldierIndex) {
+    problem.constraints.push(`(z[${timeIndex}][0][${soldierIndex}] + z[${timeIndex}][1][${soldierIndex}]) * ${problem.coefficients["k"][soldierIndex][timeIndex] ? problem.coefficients["k"][soldierIndex][timeIndex] : 0} <= 0`);
+}
+function solelaPatrolSoldiersAmount(j) {
+    throw new Error('Function not implemented.');
+}
+function shinGimelSoldiersAmount(j) {
+    throw new Error('Function not implemented.');
+}
+function twoFromSameTeamInShinGimelNotAllowed(j, i) {
+    throw new Error('Function not implemented.');
+}
+function soldierAllowedToBeAtMaximumOneStationAtOnce(j, i) {
+    throw new Error('Function not implemented.');
+}
 parseConfigurationFile().then(() => {
-    writeObjectToFile(problem, outputFile);
-    writeObjectToFile(historyEvaluationMap, outputFile);
+    let optimizationProblem = {
+        objective: problem.objective,
+        constraints: problem.constraints,
+        dimensions: { j: problem.variables["z"].length, k: 2, i: nameToIndexMap.size }
+    };
+    writeObjectToFile(optimizationProblem, outputFile);
+    // solveBinaryOptimizationProblem(optimizationProblem)
+    // .then((solution) => {
+    //     console.log('Optimization solution:', solution);
+    // })
+    // .catch((error) => {
+    //     console.error('Error:', error);
+    // });
 });

@@ -6,6 +6,13 @@ import axios from 'axios';
 const filePath = path.join(__dirname, '..', 'config.json');
 const outputFile = 'output.json';
 
+Date.prototype.toString = function (): string {
+    return this.toLocaleString();
+};
+Date.prototype.toJSON = function (): string {
+    return this.toLocaleString();
+};
+
 let planUntil:Date = new Date();
 let planFrom:Date = new Date();
 let patrolIntervals:number; //in minutes
@@ -21,11 +28,11 @@ let crewToValueIndex:Map<string,number> = new Map();
     crewToValueIndex.set("1c",5);
     crewToValueIndex.set("2a",7);
     crewToValueIndex.set("2b",11);
-let problem = {
-    variables: {},
+let problem : any= {
+    variables: {} ,
     coefficients:{},
-    constraints: {},
-    objective: {}
+    constraints: [],
+    objective: ''
 };
 
 async function parseConfigurationFile(): Promise<void>  {
@@ -47,17 +54,8 @@ async function parseConfigurationFile(): Promise<void>  {
                                 from:stringToDateTimeParser(jsonData.nightPatrolTime.from),
                                 until:stringToDateTimeParser(jsonData.nightPatrolTime.until)
                                 }
-            problem.variables["z"] = quantizeTime(planFrom,planUntil,patrolIntervals);
-            problem.variables["z"].map((patrolTime)=> {
-                problem.variables["z"]["solela"] = [];
-                
-            })
-            shinGimelTimes = jsonData.shinGimelTimes.forEach(element => {
-                problem.variables["z"].map((patrolTime)=> {
-                    problem.variables["z"]["shinGimel"] = isInFullDateRange(element.from, element.until, patrolTime.time) ? [] : undefined;
-                })
-            });;
-
+            problem.variables["z"] = quantizeTime(planFrom,planUntil,patrolIntervals)
+            
             //TODO: readyWithDawnTimes
             readyWithDawnTime = stringToDateTimeParser(jsonData.readyWithDawnTime);
             problem.coefficients["k"] = []
@@ -65,18 +63,22 @@ async function parseConfigurationFile(): Promise<void>  {
             problem.coefficients["t"] = []
             problem.coefficients["s"] = []
             jsonData.soldiers.forEach((soldier, i) => {
-                indexToNameMap[i]=soldier.name;
-                nameToIndexMap[soldier.name] = i;
-                problem.variables["z"].map((patrolTime) => {
+                indexToNameMap.set(i,soldier.name)
+                nameToIndexMap.set(soldier.name,i);
+                problem.coefficients["k"][i] = []
+                problem.coefficients["m"][i] = []
+                problem.variables["z"].map((patrolTime,j) => {
                     soldier.commanderTimes.map((commanderTime) => {
-                        problem.coefficients["k"][i] = []
-                        problem.coefficients["k"][i][patrolTime.time] = isInFullDateRange(commanderTime.from, commanderTime.until, patrolTime.time) ? 1 : 0;
+                        commanderTime.from = stringToDateTimeParser(commanderTime.from)
+                        commanderTime.until = stringToDateTimeParser(commanderTime.until)
+                        problem.coefficients["k"][i][j] = isInFullDateRange(commanderTime.from, commanderTime.until, patrolTime.time) ? 1 : 0;
                     });
                 });
                 problem.variables["z"].forEach((patrolTime) => {
-                    soldier.presentDates.map((presentTime) => {
-                        problem.coefficients["m"][i] = []
-                        problem.coefficients["m"][i][patrolTime.time] = isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time) ? 1 : 0;
+                    soldier.presentDates.map((presentTime,j) => {
+                        presentTime.from = stringToDateTimeParser(presentTime.from)
+                        presentTime.until = stringToDateTimeParser(presentTime.until)
+                        problem.coefficients["m"][i][j] = isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time) ? 1 : 0;
                     });
                 });
                 problem.coefficients["t"][i] = crewToValueIndex.get(soldier.crew);
@@ -112,6 +114,74 @@ async function parseConfigurationFile(): Promise<void>  {
                     isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight+1) : hold.day = (curDay + 1);
                 }
             })
+
+            if (!problem.constraints) {
+                problem.constraints = []; // Initialize constraints array if not already initialized
+            }
+            problem.variables["z"].map((patrolTime,j)=> {
+                    //solelaPatrolSoldiersAmount(j);
+                    //shinGimelSoldiersAmount(j);
+                    for(var i=0; i<nameToIndexMap.size; i++){
+                        commanderDontDoPatrols(j,i);
+                        MTOrMedicDontDoShinGimelConstraint(j,i);
+                        //twoFromSameTeamInShinGimelNotAllowed(j, i);
+                        //soldierAllowedToBeAtMaximumOneStationAtOnce(j,i);
+                        for(var k=0; k<=1; k++){
+                            soldierPresencyConstraint(j,k,i);
+                        }
+                    }
+                
+                
+            })
+            problem.objective = ``;
+            console.log(nameToIndexMap.size)
+            nameToIndexMap.forEach( (i, soldierName) => {
+                let dayExpression = ``;
+                let nightExpression = ``;
+                let dayHistory = 0;
+                let nightHistory = 0;
+                if(historyEvaluationMap.get(i)) {
+                    dayHistory = historyEvaluationMap[i].day
+                    nightHistory = historyEvaluationMap[i].night
+                }
+                console.log(" "," ",i)
+                problem.variables["z"].map((patrolTime, j) => {
+                    for (let k = 0; k<=1; k++) {
+                        if(isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, patrolTime.time)) {
+                            nightExpression = nightExpression.concat(`z[${j}][${k}][${i}] +`)
+                        } else {
+                            dayExpression = dayExpression.concat(`z[${j}][${k}][${i}] +`)
+                        }
+                    }
+
+                })
+                let dayExpExists = false, nightExpExists = false;;
+                if(dayExpression.length != 0) {
+                    dayExpression = dayExpression.concat(`${dayHistory}`)
+                    dayExpression = `(`.concat(dayExpression).concat(`) ** 2`)
+                    dayExpExists = true;
+                }
+                if(nightExpression.length != 0) {
+                    nightExpression = nightExpression.concat(`${nightHistory}`)
+                    nightExpression = `(`.concat(nightExpression).concat(`) ** 3`)
+                    nightExpExists = true;
+                }
+                let totalExpForSoldier = ``
+                if(dayExpExists && nightExpExists) {
+                    totalExpForSoldier = dayExpression.concat(` + `).concat(nightExpression)
+                }
+                else {
+                    totalExpForSoldier = dayExpression.concat(nightExpression)
+                }
+
+                if(problem.objective.length == 0) {
+                    problem.objective = totalExpForSoldier
+                }
+                else {
+                    problem.objective = problem.objective.concat(` + `).concat(totalExpForSoldier)
+                }
+            })
+            
             console.log("Finished parsing config file")
             resolve()
         } catch (error) {
@@ -168,14 +238,6 @@ function writeObjectToFile(objectData: object, filePath: string): void {
     }
 }
 
-Date.prototype.toString = function (): string {
-    return this.toLocaleString();
-};
-Date.prototype.toJSON = function (): string {
-    return this.toLocaleString();
-};
-
-
 async function solveBinaryOptimizationProblem(optProblem): Promise<void> {
     // const optimizationProblem = {
     //     objective: 'x[0][0][0] + x[1][1][1] + x[2][2][2]', // Objective function with a 3D matrix of binary variables
@@ -188,30 +250,59 @@ async function solveBinaryOptimizationProblem(optProblem): Promise<void> {
     // };
 
     try {
-        const response = await axios.post('http://localhost:5000/solve_optimization', optProblem);
+        const response = await axios.get('http://localhost:5003/solve_optimization');
         console.log('Optimization solution:', response.data);
     } catch (error) {
         console.error('Error solving binary optimization problem:', error);
     }
 }
 
-parseConfigurationFile().then(() => {
-    writeObjectToFile(problem, outputFile)
-    writeObjectToFile(historyEvaluationMap, outputFile)
 
+function MTOrMedicDontDoShinGimelConstraint(timeIndex:number, soldierIndex:number) {
+    problem.constraints.push(`z[${timeIndex}][1][${soldierIndex}] * ${problem.coefficients["s"][soldierIndex]} <= 0`);
+}
+function soldierPresencyConstraint(timeIndex: number, stationIndex: number, soldierIndex: number) {
+    for(var k=0; k <=1; k++) {
+        problem.constraints.push(`z[${timeIndex}][${k}][${soldierIndex}]  <= ${problem.coefficients["m"][soldierIndex][timeIndex] ? problem.coefficients["m"][soldierIndex][timeIndex] : 0 }`);
+    }
+}
+function commanderDontDoPatrols(timeIndex: any, soldierIndex: number) {
+    problem.constraints.push(`(z[${timeIndex}][0][${soldierIndex}] + z[${timeIndex}][1][${soldierIndex}]) * ${problem.coefficients["k"][soldierIndex][timeIndex] ? problem.coefficients["k"][soldierIndex][timeIndex] : 0 } <= 0`);
+}
+
+function solelaPatrolSoldiersAmount(j: any) {
+    throw new Error('Function not implemented.');
+}
+
+function shinGimelSoldiersAmount(j: any) {
+    throw new Error('Function not implemented.');
+}
+
+function twoFromSameTeamInShinGimelNotAllowed(j: any, i: number) {
+    throw new Error('Function not implemented.');
+}
+
+function soldierAllowedToBeAtMaximumOneStationAtOnce(j: any, i: number) {
+    throw new Error('Function not implemented.');
+}
+
+parseConfigurationFile().then(() => {
     let optimizationProblem = {
         objective: problem.objective,
-        constraints: problem.constraints
+        constraints: problem.constraints,
+        dimensions: {j:problem.variables["z"].length,k:2,i:nameToIndexMap.size}
     };
-
-    solveBinaryOptimizationProblem(optimizationProblem)
-    .then((solution) => {
-        console.log('Optimization solution:', solution);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    
+    writeObjectToFile(optimizationProblem, outputFile)
 
 
-
+    // solveBinaryOptimizationProblem(optimizationProblem)
+    // .then((solution) => {
+    //     console.log('Optimization solution:', solution);
+    // })
+    // .catch((error) => {
+    //     console.error('Error:', error);
+    // });
 });
+
+
