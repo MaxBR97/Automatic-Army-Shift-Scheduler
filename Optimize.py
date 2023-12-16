@@ -73,7 +73,7 @@ def solve_optimization():
         [0, 1, 0]
     ]).flatten()
 
-    initial_guess = np.zeros((j_size,k_size,i_size), dtype=int).flatten()
+    initial_guess = np.ones((j_size,k_size,i_size), dtype=int).flatten()
 
     linear_constraints = [
        # {'type': 'eq', 'fun': lambda z: z[26] + z[1] +z[1] - 1},  # Example constraint 1: z[0] + z[1] = 1
@@ -87,8 +87,14 @@ def solve_optimization():
     def add_binaryVariables_constraints(linear_constraints, num):
         for index in range(num):
             # example: {'type': 'eq', 'fun': lambda z: z[2] * (1 - z[2])}  # Constraint to enforce z[2] as binary (0 or 1)
-            equation = {'type': 'eq', 'fun': lambda z, idx=index: z[idx] * (1 - z[idx])}
-            linear_constraints.append(equation)
+            # Constraint ensuring z[idx] is greater than or equal to 0
+            equation1 = {'type': 'ineq', 'fun': lambda z, idx=index: z[idx]}
+
+            # Constraint ensuring z[idx] is less than or equal to 1
+            equation2 = {'type': 'ineq', 'fun': lambda z, idx=index: 1000 - z[idx]}
+
+            linear_constraints.append(equation1)
+            linear_constraints.append(equation2)
 
     add_binaryVariables_constraints(linear_constraints, j_size*k_size*i_size)
 
@@ -159,8 +165,7 @@ def solve_optimization():
     #add_expression_constraint(linear_constraints,"(z[51] + z[0] ** 2 ) * 3 != z[3]")
 
     # Call scipy.optimize.minimize with the flattened initial guess and constraints
-    linear_constraints.append({'type': 'ineq', 'fun': lambda z, idx1=1, idx2=1, val=1: z[1] * z[1] - 1})
-    result = minimize(objective_function, x0=initial_guess, constraints=linear_constraints, tol=1e-6)
+    result = minimize(objective_function, x0=initial_guess, method='COBYLA',constraints=linear_constraints, tol=1e-9, options={'maxiter': 10000})
 
     # Reshape the result back to the original shape
     result_array = result.x.reshape((j_size, k_size,i_size))
