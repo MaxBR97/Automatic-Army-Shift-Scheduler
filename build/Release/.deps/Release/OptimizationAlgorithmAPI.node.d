@@ -1,0 +1,1 @@
+cmd_Release/OptimizationAlgorithmAPI.node := ln -f "Release/obj.target/OptimizationAlgorithmAPI.node" "Release/OptimizationAlgorithmAPI.node" 2>/dev/null || (rm -rf "Release/OptimizationAlgorithmAPI.node" && cp -af "Release/obj.target/OptimizationAlgorithmAPI.node" "Release/OptimizationAlgorithmAPI.node")

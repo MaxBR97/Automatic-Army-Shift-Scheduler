@@ -1,0 +1,1 @@
+cmd_Release/obj.target/OptimizationAlgorithmAPI.node := g++ -o Release/obj.target/OptimizationAlgorithmAPI.node -shared -pthread -rdynamic -m64  -Wl,-soname=OptimizationAlgorithmAPI.node -Wl,--start-group Release/obj.target/OptimizationAlgorithmAPI/src/OptimizationLibrary/src/OptimizationAlgorithmAPI.o -Wl,--end-group 
