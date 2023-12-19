@@ -3,7 +3,7 @@
         "target": "es6", // or specify the target version you want
         "module": "commonjs",
         "strict": false,
-        "esModuleInterop": true
+        "esModuleInterop": true,
     },
     "include": [
         "src/**/*.ts" // Path to your TypeScript files

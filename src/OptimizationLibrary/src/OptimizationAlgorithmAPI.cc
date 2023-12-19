@@ -1,6 +1,8 @@
 #include <node_api.h>
 #include <vector>
 #include <iostream>
+#include <string.h>
+#include <cstring>
 
 
 //int*** problemVariables = nullptr; // Declare the global variable
@@ -10,25 +12,27 @@ namespace demo {
     typedef bool (*BoolFunctionPtr)(int***);
     typedef int (*IntFunctionPtr)(int***);
     int*** problemVariables = nullptr;
-    int** t = nullptr;
+    int* t = nullptr;
     int** m = nullptr;
     int** k = nullptr;
     int** s = nullptr;
     int** u = nullptr;
     int** historyValues = nullptr; // i * 2
+    bool* nightShifts = nullptr;
+    int* shinGimelTimes = nullptr;
     int j_size=1, k_size=1, i_size=1;
     std::vector<BoolFunctionPtr> constraintLambdas; // = {Function1, Function2};
     std::vector<BoolFunctionPtr> feasibilityOfConstraints;
     IntFunctionPtr * objectiveFunction = nullptr;
     int currentMinValue = 999999999;
-    int* currentBestAnswer = nullptr;
+    int*** currentBestAnswer = nullptr;
 
     #include <iostream>
 
 void initializeVariables() {
     for (int j = 0; j < j_size; ++j) {
-        for (int k = 0; k < dim2; ++k) {
-            for (int i = 0; i < dim3; ++i) {
+        for (int k = 0; k < k_size; ++k) {
+            for (int i = 0; i < i_size; ++i) {
                 problemVariables[i][j][k] = 0;
             }
         }
@@ -56,6 +60,11 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
                 
             }
         }
+    }
+
+    //TODO
+    bool isNight(int j) {
+        return true;
     }
 
     int evaluateObjectiveFunction(int*** arr) {
@@ -89,11 +98,6 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
 
     }
 
-    //TODO
-    bool isNight(int j) {
-        return true;
-    }
-
     bool checkEnoughSoldiersInSolela() {
         for (int j = 0; j < j_size; ++j) {
                 int total = 0;
@@ -109,9 +113,13 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return true;
     }
 
+    bool isShinGimelNeeded(int j) {
+        return true;
+    }
+
     bool checkEnoughSoldiersInShinGimel() {
         for (int j = 0; j < j_size; ++j) {
-                if(!shinGimelNeeded(j))
+                if(!isShinGimelNeeded(j))
                     continue;
                 int total = 0;
                 for (int i = 0; i < i_size; ++i) {
@@ -205,200 +213,84 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         rec(0,0,0,0,false,false,true,true,true);
     }
 
-
+    //recieves 3 dimensions (int) of variables
     napi_value SetProblemVariables(napi_env env, napi_callback_info info) {
         napi_status status;
 
-        // Get the number of arguments passed to the function
-        size_t argc = 4;
-        napi_value args[4];
+        size_t argc = 3;
+        napi_value args[3];
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if (status != napi_ok || argc < 4) {
-            napi_throw_error(env, nullptr, "Expected 4 arguments");
+        if (status != napi_ok || argc < 3) {
+            napi_throw_error(env, nullptr, "Expected 3 arguments");
             return nullptr;
         }
 
-        // Extract the array and dimensions from the arguments
-        napi_value jsArray = args[0];
-        int dim1, dim2, dim3;
-        status = napi_get_value_int32(env, args[1], &dim1);
+        int32_t j_, k_, i_;
+
+        status = napi_get_value_int32(env, args[0], &j_);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+            napi_throw_error(env, nullptr, "Invalid value for j_size");
             return nullptr;
         }
-        status = napi_get_value_int32(env, args[2], &dim2);
+
+        status = napi_get_value_int32(env, args[1], &k_);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Invalid value for dimension 2");
+            napi_throw_error(env, nullptr, "Invalid value for k_size");
             return nullptr;
         }
-        status = napi_get_value_int32(env, args[3], &dim3);
+
+        status = napi_get_value_int32(env, args[2], &i_);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Invalid value for dimension 3");
-            return nullptr;
-        }
-        j_size=dim1;
-        k_size=dim2;
-        i_size=dim3;
-        // Check if the argument is an array
-        bool is_array;
-        status = napi_is_array(env, jsArray, &is_array);
-        if (status != napi_ok || !is_array) {
-            napi_throw_error(env, nullptr, "Argument must be an array");
+            napi_throw_error(env, nullptr, "Invalid value for i_size");
             return nullptr;
         }
 
-        // Cleanup previous allocation if any
-        // Note: You might want to implement cleanupProblemVariables()
-        // to deallocate memory when re-assigning problemVariables
-        // cleanupProblemVariables();
-
-        // Allocate memory for the problemVariables based on dimensions
-        problemVariables = new int**[dim1];
-        for (int i = 0; i < dim1; ++i) {
-            problemVariables[i] = new int*[dim2];
-            for (int j = 0; j < dim2; ++j) {
-                problemVariables[i][j] = new int[dim3];
-            }
-        }
-
-        // Parsing the incoming JavaScript array into problemVariables
-        for (int i = 0; i < dim1; ++i) {
-            napi_value jsRow;
-            status = napi_get_element(env, jsArray, i, &jsRow);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Error getting row from the array");
-                return nullptr;
-            }
-
-            // Check if the row is an array
-            status = napi_is_array(env, jsRow, &is_array);
-            if (status != napi_ok || !is_array) {
-                napi_throw_error(env, nullptr, "Row must be an array");
-                return nullptr;
-            }
-
-            for (int j = 0; j < dim2; ++j) {
-                napi_value jsInnerRow;
-                status = napi_get_element(env, jsRow, j, &jsInnerRow);
-                if (status != napi_ok) {
-                    napi_throw_error(env, nullptr, "Error getting inner row from the array");
-                    return nullptr;
-                }
-
-                // Check if the inner row is an array
-                status = napi_is_array(env, jsInnerRow, &is_array);
-                if (status != napi_ok || !is_array) {
-                    napi_throw_error(env, nullptr, "Inner row must be an array");
-                    return nullptr;
-                }
-
-                for (int k = 0; k < dim3; ++k) {
-                    napi_value jsValue;
-                    status = napi_get_element(env, jsInnerRow, k, &jsValue);
-                    if (status != napi_ok) {
-                        napi_throw_error(env, nullptr, "Error getting value from the array");
-                        return nullptr;
-                    }
-
-                    int value;
-                    status = napi_get_value_int32(env, jsValue, &value);
-                    if (status != napi_ok) {
-                        napi_throw_error(env, nullptr, "Invalid value in the array");
-                        return nullptr;
-                    }
-
-                    problemVariables[i][j][k] = value;
-                }
-            }
-        }
+        // Set the received values to global variables j_size, k_size, i_size
+        // Replace the names of the global variables with your actual variable names
+        j_size = j_;
+        k_size = k_;
+        i_size = i_;
 
         return nullptr;
-    }
+}
 
+     // recieves 1d array and its size  
     napi_value SetT(napi_env env, napi_callback_info info) {
     napi_status status;
 
-    // Get the number of arguments passed to the function
-    size_t argc = 3;
-    napi_value args[3];
+    size_t argc = 2;
+    napi_value args[2];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc < 3) {
-        napi_throw_error(env, nullptr, "Expected 3 arguments");
+    if (status != napi_ok || argc < 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
         return nullptr;
     }
 
-    // Extract the array and dimensions from the arguments
-    napi_value jsArray = args[0];
-    int dim1, dim2;
-    status = napi_get_value_int32(env, args[1], &dim1);
+    // Extracting the size of the array
+    int32_t size;
+    status = napi_get_value_int32(env, args[1], &size);
     if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
-        return nullptr;
-    }
-    status = napi_get_value_int32(env, args[2], &dim2);
-    if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Invalid value for dimension 2");
+        napi_throw_error(env, nullptr, "Invalid value for size");
         return nullptr;
     }
 
-    // Check if the argument is an array
-    bool is_array;
-    status = napi_is_array(env, jsArray, &is_array);
-    if (status != napi_ok || !is_array) {
-        napi_throw_error(env, nullptr, "Argument must be an array");
+    // Extracting the array
+    int* array;
+    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
+    if (status != napi_ok || array == nullptr) {
+        napi_throw_error(env, nullptr, "Invalid array");
         return nullptr;
     }
 
-    // Cleanup previous allocation if any
-    // Note: You might want to implement cleanupT()
-    // to deallocate memory when re-assigning 't'
-    // cleanupT();
-
-    // Allocate memory for 't' based on dimensions
-    t = new int*[dim1];
-    for (int i = 0; i < dim1; ++i) {
-        t[i] = new int[dim2];
-    }
-
-    // Parsing the incoming JavaScript array into 't'
-    for (int i = 0; i < dim1; ++i) {
-        napi_value jsRow;
-        status = napi_get_element(env, jsArray, i, &jsRow);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Error getting row from the array");
-            return nullptr;
-        }
-
-        // Check if the row is an array
-        status = napi_is_array(env, jsRow, &is_array);
-        if (status != napi_ok || !is_array) {
-            napi_throw_error(env, nullptr, "Row must be an array");
-            return nullptr;
-        }
-
-        for (int j = 0; j < dim2; ++j) {
-            napi_value jsValue;
-            status = napi_get_element(env, jsRow, j, &jsValue);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Error getting value from the array");
-                return nullptr;
-            }
-
-            int value;
-            status = napi_get_value_int32(env, jsValue, &value);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Invalid value in the array");
-                return nullptr;
-            }
-
-            t[i][j] = value;
-        }
-    }
+    // Allocate memory for global variable t and copy the array
+    // Replace t_size with the actual size of the array
+    t = new int[size];
+    std::memcpy(t, array, size * sizeof(int));
 
     return nullptr;
 }
-
-napi_value SetU(napi_env env, napi_callback_info info) {
+    // recieves 2D array, and its 2 dimensions
+    napi_value SetU(napi_env env, napi_callback_info info) {
     napi_status status;
 
     // Get the number of arguments passed to the function
@@ -480,92 +372,92 @@ napi_value SetU(napi_env env, napi_callback_info info) {
 
     return nullptr;
 }
+    //recieves 2D array and its 2 dimensions
+    napi_value SetS(napi_env env, napi_callback_info info) {
+        napi_status status;
 
-napi_value SetS(napi_env env, napi_callback_info info) {
-    napi_status status;
+        // Get the number of arguments passed to the function
+        size_t argc = 3;
+        napi_value args[3];
+        status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+        if (status != napi_ok || argc < 3) {
+            napi_throw_error(env, nullptr, "Expected 3 arguments");
+            return nullptr;
+        }
 
-    // Get the number of arguments passed to the function
-    size_t argc = 3;
-    napi_value args[3];
-    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc < 3) {
-        napi_throw_error(env, nullptr, "Expected 3 arguments");
-        return nullptr;
-    }
-
-    // Extract the array and dimensions from the arguments
-    napi_value jsArray = args[0];
-    int dim1, dim2;
-    status = napi_get_value_int32(env, args[1], &dim1);
-    if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
-        return nullptr;
-    }
-    status = napi_get_value_int32(env, args[2], &dim2);
-    if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Invalid value for dimension 2");
-        return nullptr;
-    }
-
-    // Check if the argument is an array
-    bool is_array;
-    status = napi_is_array(env, jsArray, &is_array);
-    if (status != napi_ok || !is_array) {
-        napi_throw_error(env, nullptr, "Argument must be an array");
-        return nullptr;
-    }
-
-    // Cleanup previous allocation if any
-    // Note: You might want to implement cleanupS()
-    // to deallocate memory when re-assigning 's'
-    // cleanupS();
-
-    // Allocate memory for 's' based on dimensions
-    s = new int*[dim1];
-    for (int i = 0; i < dim1; ++i) {
-        s[i] = new int[dim2];
-    }
-
-    // Parsing the incoming JavaScript array into 's'
-    for (int i = 0; i < dim1; ++i) {
-        napi_value jsRow;
-        status = napi_get_element(env, jsArray, i, &jsRow);
+        // Extract the array and dimensions from the arguments
+        napi_value jsArray = args[0];
+        int dim1, dim2;
+        status = napi_get_value_int32(env, args[1], &dim1);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Error getting row from the array");
+            napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+            return nullptr;
+        }
+        status = napi_get_value_int32(env, args[2], &dim2);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Invalid value for dimension 2");
             return nullptr;
         }
 
-        // Check if the row is an array
-        status = napi_is_array(env, jsRow, &is_array);
+        // Check if the argument is an array
+        bool is_array;
+        status = napi_is_array(env, jsArray, &is_array);
         if (status != napi_ok || !is_array) {
-            napi_throw_error(env, nullptr, "Row must be an array");
+            napi_throw_error(env, nullptr, "Argument must be an array");
             return nullptr;
         }
 
-        for (int j = 0; j < dim2; ++j) {
-            napi_value jsValue;
-            status = napi_get_element(env, jsRow, j, &jsValue);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Error getting value from the array");
-                return nullptr;
-            }
+        // Cleanup previous allocation if any
+        // Note: You might want to implement cleanupS()
+        // to deallocate memory when re-assigning 's'
+        // cleanupS();
 
-            int value;
-            status = napi_get_value_int32(env, jsValue, &value);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Invalid value in the array");
-                return nullptr;
-            }
-
-            s[i][j] = value;
+        // Allocate memory for 's' based on dimensions
+        s = new int*[dim1];
+        for (int i = 0; i < dim1; ++i) {
+            s[i] = new int[dim2];
         }
+
+        // Parsing the incoming JavaScript array into 's'
+        for (int i = 0; i < dim1; ++i) {
+            napi_value jsRow;
+            status = napi_get_element(env, jsArray, i, &jsRow);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Error getting row from the array");
+                return nullptr;
+            }
+
+            // Check if the row is an array
+            status = napi_is_array(env, jsRow, &is_array);
+            if (status != napi_ok || !is_array) {
+                napi_throw_error(env, nullptr, "Row must be an array");
+                return nullptr;
+            }
+
+            for (int j = 0; j < dim2; ++j) {
+                napi_value jsValue;
+                status = napi_get_element(env, jsRow, j, &jsValue);
+                if (status != napi_ok) {
+                    napi_throw_error(env, nullptr, "Error getting value from the array");
+                    return nullptr;
+                }
+
+                int value;
+                status = napi_get_value_int32(env, jsValue, &value);
+                if (status != napi_ok) {
+                    napi_throw_error(env, nullptr, "Invalid value in the array");
+                    return nullptr;
+                }
+
+                s[i][j] = value;
+            }
+        }
+
+        return nullptr;
     }
 
-    return nullptr;
-}
-
-
-napi_value SetK(napi_env env, napi_callback_info info) {
+    //recieves 2D array and its 2 dimensions
+    napi_value SetK(napi_env env, napi_callback_info info) {
     napi_status status;
 
     // Get the number of arguments passed to the function
@@ -647,7 +539,7 @@ napi_value SetK(napi_env env, napi_callback_info info) {
 
     return nullptr;
 }
-
+    //recieves 2D array and its 2 dimensions
     napi_value SetM(napi_env env, napi_callback_info info) {
     napi_status status;
 
@@ -731,98 +623,193 @@ napi_value SetK(napi_env env, napi_callback_info info) {
     return nullptr;
     }
 
-
-
-    napi_value AppendToConstraintLambdas(napi_env env, napi_callback_info info) {
-        napi_status status;
-
-        size_t argc = 1;
-        napi_value args[1];
-        status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if (status != napi_ok || argc < 1) {
-            napi_throw_error(env, nullptr, "Expected 1 argument");
-            return nullptr;
-        }
-        napi_value jsClosure = args[0];
-
-        // Convert the JavaScript closure to a C++ function pointer (BoolFunctionPtr)
-        BoolFunctionPtr fnPtr;
-        status = napi_unwrap(env, jsClosure, reinterpret_cast<void**>(&fnPtr));
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to unwrap JavaScript closure!!");
-            return nullptr;
-        }
-
-        // Append the function pointer to constraintLambdas
-        constraintLambdas.push_back(fnPtr);
-        return nullptr;
-    }
-
-    napi_value AppendToFeasibilityOfConstraints(napi_env env, napi_callback_info info) {
-        napi_status status;
-
-        size_t argc = 1;
-        napi_value args[1];
-        status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if (status != napi_ok || argc < 1) {
-            napi_throw_error(env, nullptr, "Expected 1 argument");
-            return nullptr;
-        }
-
-        napi_value jsClosure = args[0];
-
-        // Convert the JavaScript closure to a C++ function pointer (BoolFunctionPtr)
-        BoolFunctionPtr fnPtr;
-        status = napi_unwrap(env, jsClosure, reinterpret_cast<void**>(&fnPtr));
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to unwrap JavaScript closure");
-            return nullptr;
-        }
-
-        // Append the function pointer to feasibilityOfConstraints
-        feasibilityOfConstraints.push_back(fnPtr);
-
-        return nullptr;
-    }
-
-    napi_value createClosure(napi_env env, napi_callback_info info) {
+    //receives 1D boolean array and its dimension
+   napi_value SetNightShifts(napi_env env, napi_callback_info info) {
     napi_status status;
 
-    size_t argc = 1;
-    napi_value args[1];
+    size_t argc = 2;
+    napi_value args[2];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc < 1) {
-        napi_throw_error(env, nullptr, "Expected 1 argument");
+    if (status != napi_ok || argc < 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
         return nullptr;
     }
 
-    napi_value jsFunction = args[0];
-
-    // Create a persistent reference to the JavaScript function
-    napi_ref* funcRef = new napi_ref;
-    status = napi_create_reference(env, jsFunction, 1, funcRef);
-    if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Failed to create reference to the function");
+    // Extracting the size of the array
+    int32_t size;
+    status = napi_get_value_int32(env, args[1], &size);
+    if (status != napi_ok || size <= 0) {
+        napi_throw_error(env, nullptr, "Invalid value for size");
         return nullptr;
     }
 
-    // Convert the reference to a napi_value and return it
-    napi_value result;
-    status = napi_create_external(env, funcRef, nullptr, nullptr, &result);
-    if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Failed to create closure");
+    // Extracting the array
+    bool* array;
+    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
+    if (status != napi_ok || array == nullptr) {
+        napi_throw_error(env, nullptr, "Invalid array");
         return nullptr;
     }
-   
-    return result;
+
+    // Allocate memory for global variable nightShifts and copy the array
+    nightShifts = new bool[size];
+    std::memcpy(nightShifts, array, size * sizeof(bool));
+
+    return nullptr;
+}
+    
+    //recieves a 1D integers array and its dimension. each number means the number of required shin gimel soldiers required
+    napi_value SetShinGimelTimes(napi_env env, napi_callback_info info) {
+    napi_status status;
+
+    size_t argc = 2;
+    napi_value args[2];
+    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (status != napi_ok || argc < 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
+        return nullptr;
+    }
+
+    // Extracting the size of the array
+    int32_t size;
+    status = napi_get_value_int32(env, args[1], &size);
+    if (status != napi_ok || size <= 0) {
+        napi_throw_error(env, nullptr, "Invalid value for size");
+        return nullptr;
+    }
+
+    // Extracting the array
+    int* array;
+    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
+    if (status != napi_ok || array == nullptr) {
+        napi_throw_error(env, nullptr, "Invalid array");
+        return nullptr;
+    }
+
+    // Allocate memory for global variable x and copy the array
+    shinGimelTimes = new int[size];
+    std::memcpy(shinGimelTimes, array, size * sizeof(int));
+
+    return nullptr;
 }
 
+    //receives a 2D integers array and its dimensions.
+    napi_value SetHistory(napi_env env, napi_callback_info info) {
+    napi_status status;
+
+    size_t argc = 3;
+    napi_value args[3];
+    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (status != napi_ok || argc < 3) {
+        napi_throw_error(env, nullptr, "Expected 3 arguments");
+        return nullptr;
+    }
+
+    // Extracting the dimensions
+    int32_t dim1, dim2;
+    status = napi_get_value_int32(env, args[1], &dim1);
+    if (status != napi_ok || dim1 <= 0) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+        return nullptr;
+    }
+    status = napi_get_value_int32(env, args[2], &dim2);
+    if (status != napi_ok || dim2 <= 0) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 2");
+        return nullptr;
+    }
+
+    // Extracting the array
+    int** array;
+    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
+    if (status != napi_ok || array == nullptr) {
+        napi_throw_error(env, nullptr, "Invalid 2D array");
+        return nullptr;
+    }
+
+    // Allocate memory for global variable historyValues and copy the array
+    historyValues = new int*[dim1];
+    for (int i = 0; i < dim1; ++i) {
+        historyValues[i] = new int[dim2];
+        std::memcpy(historyValues[i], array[i], dim2 * sizeof(int));
+    }
+
+    return nullptr;
+}
+
+// returns a 3D numbers array
+    napi_value Solve(napi_env env, napi_callback_info info) {
+    napi_status status;
+
+    // Assuming dimensions of the problemVariables array are known
+    // Replace these values with actual dimensions
+    int dim1 = j_size;
+    int dim2 = k_size;
+    int dim3 = i_size;
+    cout<<"starting optimization process" << endl;
+    optimize();
+    cout << "finished optimizing!" << endl;
+
+    // Create a JavaScript 3D array to hold the problemVariables data
+    napi_value jsArray;
+    status = napi_create_array_with_length(env, dim1, &jsArray);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create JavaScript array");
+        return nullptr;
+    }
+
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsInnerArray;
+        status = napi_create_array_with_length(env, dim2, &jsInnerArray);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create JavaScript inner array");
+            return nullptr;
+        }
+
+        for (int j = 0; j < dim2; ++j) {
+            napi_value jsInnerInnerArray;
+            status = napi_create_array_with_length(env, dim3, &jsInnerInnerArray);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Failed to create JavaScript inner inner array");
+                return nullptr;
+            }
+
+            for (int k = 0; k < dim3; ++k) {
+                napi_value jsValue;
+                status = napi_create_int32(env, problemVariables[i][j][k], &jsValue);
+                if (status != napi_ok) {
+                    napi_throw_error(env, nullptr, "Failed to create JavaScript integer");
+                    return nullptr;
+                }
+
+                status = napi_set_element(env, jsInnerInnerArray, k, jsValue);
+                if (status != napi_ok) {
+                    napi_throw_error(env, nullptr, "Failed to set JavaScript element");
+                    return nullptr;
+                }
+            }
+
+            status = napi_set_element(env, jsInnerArray, j, jsInnerInnerArray);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Failed to set JavaScript inner element");
+                return nullptr;
+            }
+        }
+
+        status = napi_set_element(env, jsArray, i, jsInnerArray);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set JavaScript element");
+            return nullptr;
+        }
+    }
+
+    return jsArray;
+}
 
     napi_value Init(napi_env env, napi_value exports) {
         napi_status status;
 
-        napi_value fn, fn1, fn2, fn3, ss, sm, st, sk, su;
-        status = napi_create_function(env, nullptr, 0, SetProblemVariables, nullptr, &fn);
+        napi_value spv, sns, sh, sst, ss, sm, st, sk, su, s;
+        status = napi_create_function(env, nullptr, 0, SetProblemVariables, nullptr, &spv);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to create function");
             return nullptr;
@@ -858,7 +845,32 @@ napi_value SetK(napi_env env, napi_callback_info info) {
             return nullptr;
         }
 
-        status = napi_set_named_property(env, exports, "setProblemVariables", fn);
+        status = napi_create_function(env, nullptr, 0, SetNightShifts, nullptr, &sns);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+
+        status = napi_create_function(env, nullptr, 0, SetHistory, nullptr, &sh);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+
+        status = napi_create_function(env, nullptr, 0, Solve, nullptr, &s);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+
+        status = napi_create_function(env, nullptr, 0, SetShinGimelTimes, nullptr, &sst);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+
+
+        status = napi_set_named_property(env, exports, "setProblemVariables", spv);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
@@ -894,37 +906,25 @@ napi_value SetK(napi_env env, napi_callback_info info) {
             return nullptr;
         }
 
-        status = napi_create_function(env, nullptr, 0, AppendToConstraintLambdas, nullptr, &fn1);
+        status = napi_set_named_property(env, exports, "setNightShifts", sns);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to create function");
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
         }
 
-        status = napi_create_function(env, nullptr, 0, AppendToFeasibilityOfConstraints, nullptr, &fn2);
+        status = napi_set_named_property(env, exports, "setHistory", sh);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to create function");
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
         }
 
-        status = napi_set_named_property(env, exports, "appendToConstraintLambdas", fn1);
+        status = napi_set_named_property(env, exports, "setShinGimelTimes", sst);
         if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to set appendToConstraintLambdas as a property on exports");
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
         }
 
-        status = napi_set_named_property(env, exports, "appendToFeasibilityOfConstraints", fn2);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to set appendToFeasibilityOfConstraints as a property on exports");
-            return nullptr;
-        }
-
-        status = napi_create_function(env, nullptr, 0, createClosure, nullptr, &fn3);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Failed to create function");
-            return nullptr;
-        }
-
-        status = napi_set_named_property(env, exports, "createClosure", fn3);
+        status = napi_set_named_property(env, exports, "solve", s);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
@@ -932,7 +932,6 @@ napi_value SetK(napi_env env, napi_callback_info info) {
 
         return exports;
     }
-
 
     NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
 }

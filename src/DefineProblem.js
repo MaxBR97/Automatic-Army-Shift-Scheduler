@@ -1,20 +1,14 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require('fs');
 const path = require('path');
-const axios_1 = __importDefault(require("axios"));
+const addon = require('../build/Release/OptimizationAlgorithmAPI.node');
 // Assuming the data.json file is in the 'data' directory
 const filePath = path.join(__dirname, '..', 'config.json');
 const outputFile = 'output.json';
@@ -232,25 +226,35 @@ function writeObjectToFile(objectData, filePath) {
         console.error('Error writing to file:', error);
     }
 }
-function solveBinaryOptimizationProblem(optProblem) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // const optimizationProblem = {
-        //     objective: 'x[0][0][0] + x[1][1][1] + x[2][2][2]', // Objective function with a 3D matrix of binary variables
-        //     constraints: [
-        //         'x[0][0][0] + x[1][1][1] >= 1', // Constraint 1
-        //         'x[1][1][1] + x[2][2][2] >= 1', // Constraint 2
-        //         'x[0][0][0] != x[1][1][1]',    // Not equal constraint between x[0][0][0] and x[1][1][1]
-        //         // Add more constraints here as needed
-        //     ]
-        // };
-        try {
-            const response = yield axios_1.default.get('http://localhost:5003/solve_optimization');
-            console.log('Optimization solution:', response.data);
-        }
-        catch (error) {
-            console.error('Error solving binary optimization problem:', error);
-        }
-    });
+function prepareProblemDomainAndSolve() {
+    console.log("enter");
+    let nightShifts = [];
+    let historyValues = [];
+    let shinGimelTimes = [];
+    for (let j = 0; j < problem.variables["z"].length; j++) {
+        if (problem.variables["z"].isNight)
+            nightShifts[j] = true;
+        else
+            nightShifts[j] = false;
+    }
+    for (let i = 0; i < historyEvaluationMap.size; i++) {
+        historyValues[i][0] = historyEvaluationMap.get(i).day;
+        historyValues[i][1] = historyEvaluationMap.get(i).night;
+    }
+    for (let j = 0; j < historyEvaluationMap.size; j++) {
+        shinGimelTimes[j] = 2;
+    }
+    addon.setProblemVariables(problem.variables["z"].length, 2, problem.coefficients["m"].length);
+    addon.setT(problem.coefficients["t"], problem.coefficients["t"].length);
+    addon.setM(problem.coefficients["m"], problem.coefficients["m"].length, problem.coefficients["m"][0].length);
+    addon.setK(problem.coefficients["k"], problem.coefficients["k"].length, problem.coefficients["k"][0].length);
+    //addon.setU(problem.coefficients["u"], problem.coefficients["u"].length, problem.coefficients["u"][0].length)
+    addon.setS(problem.coefficients["s"], problem.coefficients["s"].length, problem.coefficients["s"][0].length);
+    addon.setNightShifts(nightShifts, nightShifts.length);
+    addon.setHistory(historyValues, historyValues.length, 2);
+    addon.setShinGimelTimes(shinGimelTimes, shinGimelTimes.length);
+    const solution = addon.solve(); //solution is a 3d array
+    console.log(solution);
 }
 function MTOrMedicDontDoShinGimelConstraint(timeIndex, soldierIndex) {
     problem.constraints.push(`z[${timeIndex}][1][${soldierIndex}] * ${problem.coefficients["s"][soldierIndex]} <= 0`);
@@ -282,6 +286,7 @@ parseConfigurationFile().then(() => {
         dimensions: { j: problem.variables["z"].length, k: 2, i: nameToIndexMap.size }
     };
     writeObjectToFile(optimizationProblem, outputFile);
+    prepareProblemDomainAndSolve();
     // solveBinaryOptimizationProblem(optimizationProblem)
     // .then((solution) => {
     //     console.log('Optimization solution:', solution);
