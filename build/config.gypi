@@ -351,16 +351,7 @@
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
     "nodedir": "/home/spl211/.cache/node-gyp/16.14.0",
-    "standalone_static_library": 1,
-    "user_agent": "npm/8.3.1 node/v16.14.0 linux x64 workspaces/false",
-    "userconfig": "/home/spl211/.npmrc",
-    "local_prefix": "/home/spl211/Downloads/Army_Shcedule_App/Automatic-Army-Shift-Scheduler",
-    "metrics_registry": "https://registry.npmjs.org/",
-    "prefix": "/usr/local",
-    "cache": "/home/spl211/.npm",
-    "node_gyp": "/usr/local/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js",
-    "globalconfig": "/usr/local/etc/npmrc",
-    "init_module": "/home/spl211/.npm-init.js",
-    "global_prefix": "/usr/local"
+    "python": "/usr/bin/python3",
+    "standalone_static_library": 1
   }
 }

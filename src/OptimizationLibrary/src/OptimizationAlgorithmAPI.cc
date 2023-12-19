@@ -26,14 +26,48 @@ namespace demo {
     IntFunctionPtr * objectiveFunction = nullptr;
     int currentMinValue = 999999999;
     int*** currentBestAnswer = nullptr;
+    long sumOfRecursiveCalls = 0;
+    int quantizeProgression = 10; //
 
     #include <iostream>
 
+void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
+    if(arr != nullptr) {
+    for (int i = 0; i < dim1; ++i) {
+        for (int j = 0; j < dim2; ++j) {
+            delete[] arr[i][j];
+        }
+        delete[] arr[i];
+    }
+    delete[] arr;
+    }
+}
+
+
 void initializeVariables() {
+    delete3DArray(currentBestAnswer,j_size,k_size,i_size);
+    delete3DArray(problemVariables, j_size, k_size, i_size);
+
+    currentBestAnswer = new int**[j_size];
     for (int j = 0; j < j_size; ++j) {
+        currentBestAnswer[j] = new int*[k_size];
         for (int k = 0; k < k_size; ++k) {
+            currentBestAnswer[j][k] = new int[i_size];
             for (int i = 0; i < i_size; ++i) {
-                problemVariables[i][j][k] = 0;
+                //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
+                currentBestAnswer[j][k][i] = -1;
+            }
+        }
+    }
+
+    problemVariables = new int**[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        problemVariables[j] = new int*[k_size];
+        for (int k = 0; k < k_size; ++k) {
+            problemVariables[j][k] = new int[i_size];
+            for (int i = 0; i < i_size; ++i) {
+                //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
+                problemVariables[j][k][i] = 0;
             }
         }
     }
@@ -41,8 +75,8 @@ void initializeVariables() {
 
 void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     for (int i = 0; i < dim1; ++i) {
-        std::cout << "Layer " << i << ":\n";
         for (int j = 0; j < dim2; ++j) {
+            std::cout << "Layer " << i << "," << j << ":\n";
             for (int k = 0; k < dim3; ++k) {
                 std::cout << arr[i][j][k] << " ";
             }
@@ -61,19 +95,24 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             }
         }
     }
-
-    //TODO
+    void print1DArray(int* arr, int dim1) {
+        for (int i = 0; i < dim1; ++i) {
+                    std::cout << "arr[" << i << "] = "
+                            << arr[i] << std::endl;    
+        }
+    }
+    
     bool isNight(int j) {
-        return true;
+        return nightShifts[j];
     }
 
     int evaluateObjectiveFunction(int*** arr) {
+        //print3DArray(problemVariables,j_size,k_size,i_size);
         int sum = 0;
         for (int i = 0; i < i_size; ++i) {
             int day = 0;
             int night = 0;
             for (int j = 0; j < j_size; ++j) {
-            
                 if(isNight(j)){
                     for (int k = 0; k < k_size; ++k) {
                         night+= problemVariables[j][k][i];
@@ -85,36 +124,44 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
                     }
                 }
             }
+            
             day += historyValues[i][0];
-            night += historyValues[i][0];
+            night += historyValues[i][1];
             day = day*day;
             night = night*night*night;
-            sum = sum + day + night;
+            int soldierSum = day+night;
+            sum = sum + soldierSum;
         }
         return sum;
 }
     // deep copy all values of 'toCopy' array to 'subject' array. Assume they are same dimensions.
-    void deepCopyArr (int *** toCopy, int *** subject, int dim1, int dim2, int dim3) {
-
+    void deepCopyArr(int ***toCopy, int ***subject, int dim1, int dim2, int dim3) {
+        for (int i = 0; i < dim1; ++i) {
+            for (int j = 0; j < dim2; ++j) {
+                for (int k = 0; k < dim3; ++k) {
+                    subject[i][j][k] = toCopy[i][j][k];
+                }
+            }
+        }
     }
+
 
     bool checkEnoughSoldiersInSolela() {
         for (int j = 0; j < j_size; ++j) {
                 int total = 0;
                 for (int i = 0; i < i_size; ++i) {
                     total += problemVariables[j][0][i];
-                    
                 }
-                if(total >= 2 && isNight(j))
+                if(total < 2 && isNight(j))
                     return false;
-                else if(total >= 1)
+                else if(total < 1 && !isNight(j))
                     return false;
         }
         return true;
     }
 
     bool isShinGimelNeeded(int j) {
-        return true;
+        return shinGimelTimes[j] == 2;
     }
 
     bool checkEnoughSoldiersInShinGimel() {
@@ -145,10 +192,13 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     }
 
     void rec(int j, int k, int i, int valueToTry,bool solela, bool shinGimel, bool commander, bool present, bool differentStations) {
-
+        if(sumOfRecursiveCalls % 100000000 == 0)
+            cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
+        sumOfRecursiveCalls ++;
+        //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
+        //print3DArray(problemVariables,j_size,k_size,i_size);
         problemVariables[j][k][i] = valueToTry;
         bool cont = false;
-
         if(!checkCommanderDoesntPatrol(j,k,i)) {
             return;
         }
@@ -182,13 +232,11 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             return;
         }
 
-        
-
-
         //recursive step
         if(i+1==i_size){
                 if(k+1==k_size){
                     if(j+1==j_size){
+                        //cout<<"reached the end"<<endl;
                         return;
                     }
                     else {
@@ -205,12 +253,18 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
                 rec(j,k,i+1,0,solela,shinGimel,commander, present, differentStations);
                 rec(j,k,i+1,1,solela,shinGimel,commander, present, differentStations);
             }
+
+            return;
     }
 
     void optimize() {
+        //j_size = 2;
+        cout<< " j_size: " << j_size << " k_size: " << k_size<< " i_size: " <<i_size<<endl;
         initializeVariables();
+        
         rec(0,0,0,0,false,false,true,true,true);
-        rec(0,0,0,0,false,false,true,true,true);
+        cout << "50% done" << endl;
+        rec(0,0,0,1,false,false,true,true,true);
     }
 
     //recieves 3 dimensions (int) of variables
@@ -255,9 +309,11 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
 }
 
      // recieves 1d array and its size  
+    
     napi_value SetT(napi_env env, napi_callback_info info) {
-    napi_status status;
+        napi_status status;
 
+    // Get the number of arguments passed to the function
     size_t argc = 2;
     napi_value args[2];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -266,28 +322,63 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return nullptr;
     }
 
-    // Extracting the size of the array
-    int32_t size;
-    status = napi_get_value_int32(env, args[1], &size);
+    // Extract the array and dimensions from the arguments
+    napi_value jsArray = args[0];
+    int dim1;
+    status = napi_get_value_int32(env, args[1], &dim1);
     if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Invalid value for size");
+        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+        return nullptr;
+    }
+    
+    // Check if the argument is an array
+    bool is_array;
+    status = napi_is_array(env, jsArray, &is_array);
+    if (status != napi_ok || !is_array) {
+        napi_throw_error(env, nullptr, "Argument must be an array");
         return nullptr;
     }
 
-    // Extracting the array
-    int* array;
-    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
-    if (status != napi_ok || array == nullptr) {
-        napi_throw_error(env, nullptr, "Invalid array");
-        return nullptr;
+    // Cleanup previous allocation if any
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
+
+    // Allocate memory for 'm' based on dimensions
+    t = new int[dim1];
+    for (int i = 0; i < dim1; ++i) {
+        t[i] = 0;
     }
 
-    // Allocate memory for global variable t and copy the array
-    // Replace t_size with the actual size of the array
-    t = new int[size];
-    std::memcpy(t, array, size * sizeof(int));
+    // Parsing the incoming JavaScript array into 'm'
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsRow;
+        status = napi_get_element(env, jsArray, i, &jsRow);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Error getting row from the array");
+            return nullptr;
+        }
+       
+        //     napi_value jsValue;
+        //     status = napi_get_element(env, jsRow, i, &jsValue);
+        //     if (status != napi_ok) {
+        //         napi_throw_error(env, nullptr, "Error getting value from the array");
+        //         return nullptr;
+        //     }
 
+            int value;
+            status = napi_get_value_int32(env, jsRow, &value);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Invalid value in the array");
+                return nullptr;
+            }
+
+            t[i] = value;
+        
+    }
+    print1DArray(t,dim1);
     return nullptr;
+
 }
     // recieves 2D array, and its 2 dimensions
     napi_value SetU(napi_env env, napi_callback_info info) {
@@ -374,89 +465,90 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
 }
     //recieves 2D array and its 2 dimensions
     napi_value SetS(napi_env env, napi_callback_info info) {
-        napi_status status;
+    napi_status status;
 
-        // Get the number of arguments passed to the function
-        size_t argc = 3;
-        napi_value args[3];
-        status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if (status != napi_ok || argc < 3) {
-            napi_throw_error(env, nullptr, "Expected 3 arguments");
-            return nullptr;
-        }
-
-        // Extract the array and dimensions from the arguments
-        napi_value jsArray = args[0];
-        int dim1, dim2;
-        status = napi_get_value_int32(env, args[1], &dim1);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Invalid value for dimension 1");
-            return nullptr;
-        }
-        status = napi_get_value_int32(env, args[2], &dim2);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Invalid value for dimension 2");
-            return nullptr;
-        }
-
-        // Check if the argument is an array
-        bool is_array;
-        status = napi_is_array(env, jsArray, &is_array);
-        if (status != napi_ok || !is_array) {
-            napi_throw_error(env, nullptr, "Argument must be an array");
-            return nullptr;
-        }
-
-        // Cleanup previous allocation if any
-        // Note: You might want to implement cleanupS()
-        // to deallocate memory when re-assigning 's'
-        // cleanupS();
-
-        // Allocate memory for 's' based on dimensions
-        s = new int*[dim1];
-        for (int i = 0; i < dim1; ++i) {
-            s[i] = new int[dim2];
-        }
-
-        // Parsing the incoming JavaScript array into 's'
-        for (int i = 0; i < dim1; ++i) {
-            napi_value jsRow;
-            status = napi_get_element(env, jsArray, i, &jsRow);
-            if (status != napi_ok) {
-                napi_throw_error(env, nullptr, "Error getting row from the array");
-                return nullptr;
-            }
-
-            // Check if the row is an array
-            status = napi_is_array(env, jsRow, &is_array);
-            if (status != napi_ok || !is_array) {
-                napi_throw_error(env, nullptr, "Row must be an array");
-                return nullptr;
-            }
-
-            for (int j = 0; j < dim2; ++j) {
-                napi_value jsValue;
-                status = napi_get_element(env, jsRow, j, &jsValue);
-                if (status != napi_ok) {
-                    napi_throw_error(env, nullptr, "Error getting value from the array");
-                    return nullptr;
-                }
-
-                int value;
-                status = napi_get_value_int32(env, jsValue, &value);
-                if (status != napi_ok) {
-                    napi_throw_error(env, nullptr, "Invalid value in the array");
-                    return nullptr;
-                }
-
-                s[i][j] = value;
-            }
-        }
-
+    // Get the number of arguments passed to the function
+    size_t argc = 3;
+    napi_value args[3];
+    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (status != napi_ok || argc < 3) {
+        napi_throw_error(env, nullptr, "Expected 3 arguments");
         return nullptr;
     }
 
-    //recieves 2D array and its 2 dimensions
+    // Extract the array and dimensions from the arguments
+    napi_value jsArray = args[0];
+    int dim1, dim2;
+    status = napi_get_value_int32(env, args[1], &dim1);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+        return nullptr;
+    }
+    status = napi_get_value_int32(env, args[2], &dim2);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 2");
+        return nullptr;
+    }
+
+    // Check if the argument is an array
+    bool is_array;
+    status = napi_is_array(env, jsArray, &is_array);
+    if (status != napi_ok || !is_array) {
+        napi_throw_error(env, nullptr, "Argument must be an array");
+        return nullptr;
+    }
+
+    // Cleanup previous allocation if any
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
+
+    // Allocate memory for 'm' based on dimensions
+    s = new int*[dim1];
+    for (int i = 0; i < dim1; ++i) {
+        s[i] = new int[dim2];
+    }
+
+    // Parsing the incoming JavaScript array into 'm'
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsRow;
+        status = napi_get_element(env, jsArray, i, &jsRow);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Error getting row from the array");
+            return nullptr;
+        }
+
+        // Check if the row is an array
+        status = napi_is_array(env, jsRow, &is_array);
+        if (status != napi_ok || !is_array) {
+            napi_throw_error(env, nullptr, "Row must be an array");
+            return nullptr;
+        }
+
+        for (int j = 0; j < dim2; ++j) {
+            napi_value jsValue;
+            status = napi_get_element(env, jsRow, j, &jsValue);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Error getting value from the array");
+                return nullptr;
+            }
+
+            int value;
+            status = napi_get_value_int32(env, jsValue, &value);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Invalid value in the array");
+                return nullptr;
+            }
+
+            s[i][j] = value;
+        }
+    }
+    print2DArray(s,dim1,dim2);
+    return nullptr;
+    
+    }
+
+    //recieves 2D array and its 2 dimensions 
     napi_value SetK(napi_env env, napi_callback_info info) {
     napi_status status;
 
@@ -492,17 +584,17 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     }
 
     // Cleanup previous allocation if any
-    // Note: You might want to implement cleanupK()
-    // to deallocate memory when re-assigning 'k'
-    // cleanupK();
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
 
-    // Allocate memory for 'k' based on dimensions
+    // Allocate memory for 'm' based on dimensions
     k = new int*[dim1];
     for (int i = 0; i < dim1; ++i) {
         k[i] = new int[dim2];
     }
 
-    // Parsing the incoming JavaScript array into 'k'
+    // Parsing the incoming JavaScript array into 'm'
     for (int i = 0; i < dim1; ++i) {
         napi_value jsRow;
         status = napi_get_element(env, jsArray, i, &jsRow);
@@ -536,7 +628,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             k[i][j] = value;
         }
     }
-
+    print2DArray(k,dim1,dim2);
     return nullptr;
 }
     //recieves 2D array and its 2 dimensions
@@ -619,14 +711,15 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             m[i][j] = value;
         }
     }
-
+    print2DArray(m,dim1,dim2);
     return nullptr;
     }
 
     //receives 1D boolean array and its dimension
    napi_value SetNightShifts(napi_env env, napi_callback_info info) {
-    napi_status status;
+       napi_status status;
 
+    // Get the number of arguments passed to the function
     size_t argc = 2;
     napi_value args[2];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -635,33 +728,71 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return nullptr;
     }
 
-    // Extracting the size of the array
-    int32_t size;
-    status = napi_get_value_int32(env, args[1], &size);
-    if (status != napi_ok || size <= 0) {
-        napi_throw_error(env, nullptr, "Invalid value for size");
+    // Extract the array and dimensions from the arguments
+    napi_value jsArray = args[0];
+    int dim1;
+    status = napi_get_value_int32(env, args[1], &dim1);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+        return nullptr;
+    }
+    
+    // Check if the argument is an array
+    bool is_array;
+    status = napi_is_array(env, jsArray, &is_array);
+    if (status != napi_ok || !is_array) {
+        napi_throw_error(env, nullptr, "Argument must be an array");
         return nullptr;
     }
 
-    // Extracting the array
-    bool* array;
-    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
-    if (status != napi_ok || array == nullptr) {
-        napi_throw_error(env, nullptr, "Invalid array");
-        return nullptr;
+    // Cleanup previous allocation if any
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
+
+    // Allocate memory for 'm' based on dimensions
+    nightShifts = new bool[dim1];
+    for (int i = 0; i < dim1; ++i) {
+        nightShifts[i] = 0;
     }
 
-    // Allocate memory for global variable nightShifts and copy the array
-    nightShifts = new bool[size];
-    std::memcpy(nightShifts, array, size * sizeof(bool));
+    // Parsing the incoming JavaScript array into 'm'
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsRow;
+        status = napi_get_element(env, jsArray, i, &jsRow);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Error getting row from the array");
+            return nullptr;
+        }
+       
+        //     napi_value jsValue;
+        //     status = napi_get_element(env, jsRow, i, &jsValue);
+        //     if (status != napi_ok) {
+        //         napi_throw_error(env, nullptr, "Error getting value from the array");
+        //         return nullptr;
+        //     }
 
+            bool value;
+            status = napi_get_value_bool(env, jsRow, &value);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Invalid value in the array");
+                return nullptr;
+            }
+
+            nightShifts[i] = value;
+        
+    }
+    for(int as=0; as<dim1; as++){
+        cout<< nightShifts[as] << endl;
+    }
     return nullptr;
 }
     
     //recieves a 1D integers array and its dimension. each number means the number of required shin gimel soldiers required
     napi_value SetShinGimelTimes(napi_env env, napi_callback_info info) {
-    napi_status status;
+        napi_status status;
 
+    // Get the number of arguments passed to the function
     size_t argc = 2;
     napi_value args[2];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -670,33 +801,69 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return nullptr;
     }
 
-    // Extracting the size of the array
-    int32_t size;
-    status = napi_get_value_int32(env, args[1], &size);
-    if (status != napi_ok || size <= 0) {
-        napi_throw_error(env, nullptr, "Invalid value for size");
+    // Extract the array and dimensions from the arguments
+    napi_value jsArray = args[0];
+    int dim1;
+    status = napi_get_value_int32(env, args[1], &dim1);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Invalid value for dimension 1");
+        return nullptr;
+    }
+    
+    // Check if the argument is an array
+    bool is_array;
+    status = napi_is_array(env, jsArray, &is_array);
+    if (status != napi_ok || !is_array) {
+        napi_throw_error(env, nullptr, "Argument must be an array");
         return nullptr;
     }
 
-    // Extracting the array
-    int* array;
-    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
-    if (status != napi_ok || array == nullptr) {
-        napi_throw_error(env, nullptr, "Invalid array");
-        return nullptr;
+    // Cleanup previous allocation if any
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
+
+    // Allocate memory for 'm' based on dimensions
+    shinGimelTimes = new int[dim1];
+    for (int i = 0; i < dim1; ++i) {
+        shinGimelTimes[i] = 0;
     }
 
-    // Allocate memory for global variable x and copy the array
-    shinGimelTimes = new int[size];
-    std::memcpy(shinGimelTimes, array, size * sizeof(int));
+    // Parsing the incoming JavaScript array into 'm'
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsRow;
+        status = napi_get_element(env, jsArray, i, &jsRow);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Error getting row from the array");
+            return nullptr;
+        }
+       
+        //     napi_value jsValue;
+        //     status = napi_get_element(env, jsRow, i, &jsValue);
+        //     if (status != napi_ok) {
+        //         napi_throw_error(env, nullptr, "Error getting value from the array");
+        //         return nullptr;
+        //     }
 
+            int value;
+            status = napi_get_value_int32(env, jsRow, &value);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Invalid value in the array");
+                return nullptr;
+            }
+
+            shinGimelTimes[i] = value;
+        
+    }
+    print1DArray(shinGimelTimes,dim1);
     return nullptr;
 }
 
     //receives a 2D integers array and its dimensions.
     napi_value SetHistory(napi_env env, napi_callback_info info) {
-    napi_status status;
+     napi_status status;
 
+    // Get the number of arguments passed to the function
     size_t argc = 3;
     napi_value args[3];
     status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -705,36 +872,76 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return nullptr;
     }
 
-    // Extracting the dimensions
-    int32_t dim1, dim2;
+    // Extract the array and dimensions from the arguments
+    napi_value jsArray = args[0];
+    int dim1, dim2;
     status = napi_get_value_int32(env, args[1], &dim1);
-    if (status != napi_ok || dim1 <= 0) {
+    if (status != napi_ok) {
         napi_throw_error(env, nullptr, "Invalid value for dimension 1");
         return nullptr;
     }
     status = napi_get_value_int32(env, args[2], &dim2);
-    if (status != napi_ok || dim2 <= 0) {
+    if (status != napi_ok) {
         napi_throw_error(env, nullptr, "Invalid value for dimension 2");
         return nullptr;
     }
 
-    // Extracting the array
-    int** array;
-    status = napi_get_arraybuffer_info(env, args[0], reinterpret_cast<void**>(&array), nullptr);
-    if (status != napi_ok || array == nullptr) {
-        napi_throw_error(env, nullptr, "Invalid 2D array");
+    // Check if the argument is an array
+    bool is_array;
+    status = napi_is_array(env, jsArray, &is_array);
+    if (status != napi_ok || !is_array) {
+        napi_throw_error(env, nullptr, "Argument must be an array");
         return nullptr;
     }
 
-    // Allocate memory for global variable historyValues and copy the array
+    // Cleanup previous allocation if any
+    // Note: You might want to implement cleanupM()
+    // to deallocate memory when re-assigning 'm'
+    // cleanupM();
+
+    // Allocate memory for 'm' based on dimensions
     historyValues = new int*[dim1];
     for (int i = 0; i < dim1; ++i) {
         historyValues[i] = new int[dim2];
-        std::memcpy(historyValues[i], array[i], dim2 * sizeof(int));
     }
 
+    // Parsing the incoming JavaScript array into 'm'
+    for (int i = 0; i < dim1; ++i) {
+        napi_value jsRow;
+        status = napi_get_element(env, jsArray, i, &jsRow);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Error getting row from the array");
+            return nullptr;
+        }
+
+        // Check if the row is an array
+        status = napi_is_array(env, jsRow, &is_array);
+        if (status != napi_ok || !is_array) {
+            napi_throw_error(env, nullptr, "Row must be an array");
+            return nullptr;
+        }
+
+        for (int j = 0; j < dim2; ++j) {
+            napi_value jsValue;
+            status = napi_get_element(env, jsRow, j, &jsValue);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Error getting value from the array");
+                return nullptr;
+            }
+
+            int value;
+            status = napi_get_value_int32(env, jsValue, &value);
+            if (status != napi_ok) {
+                napi_throw_error(env, nullptr, "Invalid value in the array");
+                return nullptr;
+            }
+
+            historyValues[i][j] = value;
+        }
+    }
+    print2DArray(historyValues,dim1,dim2);
     return nullptr;
-}
+    }
 
 // returns a 3D numbers array
     napi_value Solve(napi_env env, napi_callback_info info) {

@@ -6,7 +6,8 @@ const addon = require( '../build/Release/OptimizationAlgorithmAPI.node');
 
 // Assuming the data.json file is in the 'data' directory
 const filePath = path.join(__dirname, '..', 'config.json');
-const outputFile = 'output.json';
+const outputFile = 'expressionsOutput.json';
+const shiftsOutputFile = 'result.json';
 
 Date.prototype.toString = function (): string {
     return this.toLocaleString();
@@ -19,7 +20,7 @@ let planUntil:Date = new Date();
 let planFrom:Date = new Date();
 let patrolIntervals:number; //in minutes
 let nightPatrolTime:{from:Date,until:Date} = {from: new Date("December 13, 2023 21:00:00"), until: new Date("December 13, 2023 06:00:00")};
-let shinGimelTimes:{from:Date,until:Date} = {from: new Date(), until: new Date()};
+let shinGimelTimes:{from:Date,until:Date}[] = [];
 let readyWithDawnTime:Date;
 let indexToNameMap:Map<number,string> = new Map();
 let nameToIndexMap:Map<string,number> = new Map();
@@ -75,6 +76,9 @@ async function parseConfigurationFile(): Promise<void>  {
                         commanderTime.until = stringToDateTimeParser(commanderTime.until)
                         problem.coefficients["k"][i][j] = isInFullDateRange(commanderTime.from, commanderTime.until, patrolTime.time) ? 1 : 0;
                     });
+                    if(soldier.commanderTimes.length == 0) {
+                        problem.coefficients["k"][i][j] = 0;
+                    }
                 });
                 problem.variables["z"].forEach((patrolTime) => {
                     soldier.presentDates.map((presentTime,j) => {
@@ -84,17 +88,25 @@ async function parseConfigurationFile(): Promise<void>  {
                     });
                 });
                 problem.coefficients["t"][i] = crewToValueIndex.get(soldier.crew);
-                problem.coefficients["s"][i] = soldier.isMT || soldier.isMedic ? 1 : 0;
+                problem.coefficients["s"][i] = []
+                for (let as = 0; as < problem.variables["z"].length; as ++) {
+                    
+                    if(soldier.isMT || soldier.isMedic)
+                        problem.coefficients["s"][i][as] = 1;
+                    else
+                    problem.coefficients["s"][i][as] = 0;
+                }
+            
             });
             
             jsonData.history.solela.forEach((entry) => {
-                let index = nameToIndexMap[entry.name]
+                let index = nameToIndexMap.get(entry.name)
                 
                 if(index>=0){
-                    let hold = historyEvaluationMap[index]
+                    let hold = historyEvaluationMap.get(index)
                     if(!hold) {
-                        historyEvaluationMap[index] = {day:0, night:0}
-                        hold = historyEvaluationMap[index]
+                        historyEvaluationMap.set(index,{day:0, night:0})
+                        hold = historyEvaluationMap.get(index)
                     }
                     let curDay = hold.day ? hold.day : 0;
                     let curNight = hold.night ? hold.night : 0;
@@ -104,12 +116,12 @@ async function parseConfigurationFile(): Promise<void>  {
             })
 
             jsonData.history.shinGimel.forEach((entry) => {
-                let index = nameToIndexMap[entry.name]
+                let index = nameToIndexMap.get(entry.name)
                 if(index>=0){
-                    let hold = historyEvaluationMap[index]
+                    let hold = historyEvaluationMap.get(index)
                     if(!hold) {
-                       historyEvaluationMap[index] = {day:0, night:0}
-                       hold = historyEvaluationMap[index]
+                       historyEvaluationMap.set(index, {day:0, night:0})
+                       hold = historyEvaluationMap.get(index)
                     }
                     let curDay = hold.day ? hold.day : 0;
                     let curNight = hold.night ? hold.night : 0;
@@ -135,18 +147,26 @@ async function parseConfigurationFile(): Promise<void>  {
                 
                 
             })
+
+            //shinGimelTimes
+            jsonData.shinGimelTimes.forEach((shinGimelTime, index) => {
+                problem.variables["z"].forEach((element, index2) => {
+                    if(isInFullDateRange(stringToDateTimeParser(shinGimelTime.from), stringToDateTimeParser(shinGimelTime.until), element.time)) { 
+                        element["shinGimel"] = 2;
+                    }
+                })
+            })
+
             problem.objective = ``;
-            console.log(nameToIndexMap.size)
             nameToIndexMap.forEach( (i, soldierName) => {
                 let dayExpression = ``;
                 let nightExpression = ``;
                 let dayHistory = 0;
                 let nightHistory = 0;
                 if(historyEvaluationMap.get(i)) {
-                    dayHistory = historyEvaluationMap[i].day
-                    nightHistory = historyEvaluationMap[i].night
+                    dayHistory = historyEvaluationMap.get(i).day
+                    nightHistory = historyEvaluationMap.get(i).night
                 }
-                console.log(" "," ",i)
                 problem.variables["z"].map((patrolTime, j) => {
                     for (let k = 0; k<=1; k++) {
                         if(isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, patrolTime.time)) {
@@ -241,7 +261,6 @@ function writeObjectToFile(objectData: object, filePath: string): void {
 }
 
 function prepareProblemDomainAndSolve() {
-    console.log("enter")
     let nightShifts = []
     let historyValues = []
     let shinGimelTimes = []
@@ -253,27 +272,65 @@ function prepareProblemDomainAndSolve() {
     }
 
     for(let i = 0; i < historyEvaluationMap.size; i ++) {
+        historyValues[i] = []
         historyValues[i][0] = historyEvaluationMap.get(i).day;
         historyValues[i][1] = historyEvaluationMap.get(i).night;
     }
 
-    for(let j = 0; j < historyEvaluationMap.size; j ++) {
-        shinGimelTimes[j] = 2
-    }
+    problem.variables["z"].forEach( (patrolTime, j) => {
+        if(problem.variables["z"][j]["shinGimel"]) {
+            shinGimelTimes[j] = problem.variables["z"][j]["shinGimel"]
+        }
+        else
+            shinGimelTimes[j] = 0;
+    })
     
-
+    
+    console.log("vars dimensions: ", problem.variables["z"].length, 2 , problem.coefficients["m"].length)
     addon.setProblemVariables(problem.variables["z"].length, 2 ,problem.coefficients["m"].length)
+    console.log("t: ",problem.coefficients["t"])
     addon.setT(problem.coefficients["t"], problem.coefficients["t"].length)
+    console.log("m: ",problem.coefficients["m"])
     addon.setM(problem.coefficients["m"], problem.coefficients["m"].length, problem.coefficients["m"][0].length)
+    console.log("k: ",problem.coefficients["k"])
     addon.setK(problem.coefficients["k"], problem.coefficients["k"].length, problem.coefficients["k"][0].length)
     //addon.setU(problem.coefficients["u"], problem.coefficients["u"].length, problem.coefficients["u"][0].length)
+    console.log("s: ",problem.coefficients["s"])
     addon.setS(problem.coefficients["s"], problem.coefficients["s"].length, problem.coefficients["s"][0].length)
+    console.log("nightShifts: ",nightShifts)
     addon.setNightShifts(nightShifts, nightShifts.length)
+    console.log("historyValues: ",historyValues)
     addon.setHistory(historyValues,historyValues.length, 2)
+    console.log("shinGimelTimes: ", shinGimelTimes);
     addon.setShinGimelTimes(shinGimelTimes,shinGimelTimes.length);
     const solution = addon.solve(); //solution is a 3d array
+    return solution;
+}
 
-    console.log(solution);
+function unparseSolution(arr) {
+    type Entry = {names: string[], time:string}
+    const jsonObject: {
+                        solela:Entry[],
+                        shinGimel:Entry[]
+                        } 
+                        = {"solela": [], "shinGimel": []}
+    for(let j = 0; j<problem.variables["z"].length; j++) {
+        for(let k = 0; k<2; k++) {
+            let shiftEntry :Entry = {names:[], time: ""};
+            for(let i = 0; i<problem.variables["z"].length; i++) {
+                shiftEntry.time = problem.variables["z"][j].time.toString();
+                if(arr[j][k][i] == 1){
+                        shiftEntry.names.push(indexToNameMap.get(i))
+                    }
+            }
+            if(k==0)
+                jsonObject.solela.push(shiftEntry)
+            else if(k==1)
+                jsonObject.solela.push(shiftEntry)
+        } 
+    }
+
+    writeObjectToFile(jsonObject, shiftsOutputFile)
 }
 
 function MTOrMedicDontDoShinGimelConstraint(timeIndex:number, soldierIndex:number) {
@@ -312,8 +369,10 @@ parseConfigurationFile().then(() => {
     };
     
     writeObjectToFile(optimizationProblem, outputFile);
-    prepareProblemDomainAndSolve();
-
+    const solution = prepareProblemDomainAndSolve();
+    console.log(solution);
+    unparseSolution(solution);
+    
     // solveBinaryOptimizationProblem(optimizationProblem)
     // .then((solution) => {
     //     console.log('Optimization solution:', solution);

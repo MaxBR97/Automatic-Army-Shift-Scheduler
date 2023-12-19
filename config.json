@@ -1,14 +1,14 @@
 {
-    "planFrom" : "December 14, 2023 13:00:00",
-    "planUntil": "December 17, 2023 13:00:00",
-    "patrolIntervals": 210,
+    "planFrom" : "December 14, 2023 20:00:00",
+    "planUntil": "December 15, 2023 6:00:00",
+    "patrolIntervals": 120,
     "nightPatrolTime":{
                         "from": "00:00:00",
                         "until" : "06:00:00"
                     },
     "shinGimelTimes": [
             {
-                "from": "December 14, 2023 13:00:00",
+                "from": "December 15, 2023 00:00:00",
                 "until": "December 15, 2023 18:00:00"
             }
         ],
@@ -18,10 +18,6 @@
             { 
                 "name":"Max Brener",
                 "commanderTimes": [
-                    {
-                        "from": "December 13, 2023 13:00:00",
-                        "until": "December 14, 2023 20:00:00"
-                    }
                 ],
                 "isMT":false, 
                 "isMedic":false, 
@@ -38,6 +34,57 @@
                 "isMT":false, 
                 "isMedic":false, 
                 "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 15, 2023 13:00:00",
+                                    "until": "Januar 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Hilel Shahor",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "January 20, 2023 20:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 15, 2023 13:00:00",
+                                    "until": "Januar 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Eliezer Koplovich",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 15, 2023 13:00:00",
+                                    "until": "Januar 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ron Yoffe",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 15, 2023 13:00:00",
+                                    "until": "Januar 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Idan Zaslevsky",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
                 "presentDates":[{
                                     "from": "December 15, 2023 13:00:00",
                                     "until": "Januar 20, 2024 10:00:00"
