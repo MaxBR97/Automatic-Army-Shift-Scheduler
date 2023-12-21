@@ -1,7 +1,7 @@
 {
     "planFrom" : "December 14, 2023 20:00:00",
     "planUntil": "December 15, 2023 6:00:00",
-    "patrolIntervals": 120,
+    "patrolIntervals": 180,
     "nightPatrolTime":{
                         "from": "00:00:00",
                         "until" : "06:00:00"
@@ -24,7 +24,7 @@
                 "crew":"1a", 
                 "presentDates":[{
                                     "from": "December 13, 2023 13:00:00",
-                                    "until": "December 15, 2023 10:00:00"
+                                    "until": "December 31, 2023 10:00:00"
                                 }
                             ]
             },
@@ -35,8 +35,8 @@
                 "isMedic":false, 
                 "crew":"1c", 
                 "presentDates":[{
-                                    "from": "December 15, 2023 13:00:00",
-                                    "until": "Januar 20, 2024 10:00:00"
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
                                 }
                             ]
             },
@@ -44,14 +44,14 @@
                 "name":"Hilel Shahor",
                 "commanderTimes": [{
                     "from": "December 13, 2023 13:00:00",
-                    "until": "January 20, 2023 20:00:00"
+                    "until": "January 20, 2024 20:00:00"
                 }],
                 "isMT":false, 
                 "isMedic":false, 
                 "crew":"1a", 
                 "presentDates":[{
-                                    "from": "December 15, 2023 13:00:00",
-                                    "until": "Januar 20, 2024 10:00:00"
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
                                 }
                             ]
             },
@@ -62,8 +62,8 @@
                 "isMedic":false, 
                 "crew":"1a", 
                 "presentDates":[{
-                                    "from": "December 15, 2023 13:00:00",
-                                    "until": "Januar 20, 2024 10:00:00"
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
                                 }
                             ]
             },
@@ -74,20 +74,8 @@
                 "isMedic":false, 
                 "crew":"1c", 
                 "presentDates":[{
-                                    "from": "December 15, 2023 13:00:00",
-                                    "until": "Januar 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Idan Zaslevsky",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 15, 2023 13:00:00",
-                                    "until": "Januar 20, 2024 10:00:00"
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
                                 }
                             ]
             }

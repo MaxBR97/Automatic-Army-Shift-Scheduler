@@ -81,11 +81,13 @@ function parseConfigurationFile() {
                                 problem.coefficients["k"][i][j] = 0;
                             }
                         });
-                        problem.variables["z"].forEach((patrolTime) => {
-                            soldier.presentDates.map((presentTime, j) => {
+                        problem.variables["z"].forEach((patrolTime, j) => {
+                            problem.coefficients["m"][i][j] = 0;
+                            soldier.presentDates.forEach((presentTime, index) => {
                                 presentTime.from = stringToDateTimeParser(presentTime.from);
                                 presentTime.until = stringToDateTimeParser(presentTime.until);
-                                problem.coefficients["m"][i][j] = isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time) ? 1 : 0;
+                                if (isInFullDateRange(presentTime.from, presentTime.until, patrolTime.time))
+                                    problem.coefficients["m"][i][j] = 1;
                             });
                         });
                         problem.coefficients["t"][i] = crewToValueIndex.get(soldier.crew);
@@ -97,14 +99,13 @@ function parseConfigurationFile() {
                                 problem.coefficients["s"][i][as] = 0;
                         }
                     });
+                    nameToIndexMap.forEach((val, key) => {
+                        historyEvaluationMap.set(val, { day: 0, night: 0 });
+                    });
                     jsonData.history.solela.forEach((entry) => {
                         let index = nameToIndexMap.get(entry.name);
                         if (index >= 0) {
                             let hold = historyEvaluationMap.get(index);
-                            if (!hold) {
-                                historyEvaluationMap.set(index, { day: 0, night: 0 });
-                                hold = historyEvaluationMap.get(index);
-                            }
                             let curDay = hold.day ? hold.day : 0;
                             let curNight = hold.night ? hold.night : 0;
                             isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
@@ -114,10 +115,6 @@ function parseConfigurationFile() {
                         let index = nameToIndexMap.get(entry.name);
                         if (index >= 0) {
                             let hold = historyEvaluationMap.get(index);
-                            if (!hold) {
-                                historyEvaluationMap.set(index, { day: 0, night: 0 });
-                                hold = historyEvaluationMap.get(index);
-                            }
                             let curDay = hold.day ? hold.day : 0;
                             let curNight = hold.night ? hold.night : 0;
                             isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
@@ -247,8 +244,9 @@ function prepareProblemDomainAndSolve() {
     let nightShifts = [];
     let historyValues = [];
     let shinGimelTimes = [];
+    console.log("shifts: ", problem.variables["z"]);
     for (let j = 0; j < problem.variables["z"].length; j++) {
-        if (problem.variables["z"].isNight)
+        if (problem.variables["z"][j].isNight)
             nightShifts[j] = true;
         else
             nightShifts[j] = false;
@@ -290,7 +288,7 @@ function unparseSolution(arr) {
     for (let j = 0; j < problem.variables["z"].length; j++) {
         for (let k = 0; k < 2; k++) {
             let shiftEntry = { names: [], time: "" };
-            for (let i = 0; i < problem.variables["z"].length; i++) {
+            for (let i = 0; i < nameToIndexMap.size; i++) {
                 shiftEntry.time = problem.variables["z"][j].time.toString();
                 if (arr[j][k][i] == 1) {
                     shiftEntry.names.push(indexToNameMap.get(i));
@@ -299,7 +297,7 @@ function unparseSolution(arr) {
             if (k == 0)
                 jsonObject.solela.push(shiftEntry);
             else if (k == 1)
-                jsonObject.solela.push(shiftEntry);
+                jsonObject.shinGimel.push(shiftEntry);
         }
     }
     writeObjectToFile(jsonObject, shiftsOutputFile);

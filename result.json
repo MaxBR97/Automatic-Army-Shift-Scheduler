@@ -2,74 +2,53 @@
   "solela": [
     {
       "names": [
-        "Max Brener",
-        "Rotem Melamed"
+        "Ron Yoffe"
       ],
       "time": "14/12/2023, 20:00:00"
     },
     {
       "names": [
-        "Max Brener",
-        "Rotem Melamed"
+        "Ron Yoffe"
       ],
-      "time": "14/12/2023, 20:00:00"
+      "time": "14/12/2023, 23:00:00"
     },
     {
       "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "14/12/2023, 22:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "14/12/2023, 22:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "15/12/2023, 00:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "15/12/2023, 00:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
+        "Eliezer Koplovich",
+        "Ron Yoffe"
       ],
       "time": "15/12/2023, 02:00:00"
     },
     {
       "names": [
-        "Max Brener",
-        "Rotem Melamed"
+        "Eliezer Koplovich",
+        "Ron Yoffe"
       ],
-      "time": "15/12/2023, 02:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "15/12/2023, 04:00:00"
-    },
-    {
-      "names": [
-        "Max Brener",
-        "Rotem Melamed"
-      ],
-      "time": "15/12/2023, 04:00:00"
+      "time": "15/12/2023, 05:00:00"
     }
   ],
-  "shinGimel": []
+  "shinGimel": [
+    {
+      "names": [],
+      "time": "14/12/2023, 20:00:00"
+    },
+    {
+      "names": [],
+      "time": "14/12/2023, 23:00:00"
+    },
+    {
+      "names": [
+        "Max Brener",
+        "Rotem Melamed"
+      ],
+      "time": "15/12/2023, 02:00:00"
+    },
+    {
+      "names": [
+        "Max Brener",
+        "Rotem Melamed"
+      ],
+      "time": "15/12/2023, 05:00:00"
+    }
+  ]
 }
