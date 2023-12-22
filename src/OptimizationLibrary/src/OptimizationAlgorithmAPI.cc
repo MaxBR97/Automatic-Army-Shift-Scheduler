@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string.h>
 #include <cstring>
+#include <chrono>
 
 
 //int*** problemVariables = nullptr; // Declare the global variable
@@ -12,7 +13,7 @@ namespace demo {
     typedef bool (*BoolFunctionPtr)(int***);
     typedef int (*IntFunctionPtr)(int***);
     int*** problemVariables = nullptr;
-    int* t = nullptr; // team number
+    int* t = nullptr; // crew number
     int** m = nullptr; // is present
     int** k = nullptr; // is commander
     int** s = nullptr; //is MT
@@ -26,8 +27,14 @@ namespace demo {
     IntFunctionPtr * objectiveFunction = nullptr;
     int currentMinValue = 999999999;
     int*** currentBestAnswer = nullptr;
+    int** accumulationForObjectiveFunction = nullptr;
+    int* accumulationForSolela = nullptr;
+    int* accumulationForShinGimel = nullptr;
     long sumOfRecursiveCalls = 0;
-    int quantizeProgression = 10; //
+    int countWhatever = 0;
+
+
+    int minShiftsBreak = 4;
 
     #include <iostream>
 
@@ -44,7 +51,7 @@ void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
 }
 
 
-void initializeVariables() {
+void initializeCalculation() {
     delete3DArray(currentBestAnswer,j_size,k_size,i_size);
     delete3DArray(problemVariables, j_size, k_size, i_size);
 
@@ -58,6 +65,24 @@ void initializeVariables() {
                 currentBestAnswer[j][k][i] = -1;
             }
         }
+    }
+
+    accumulationForObjectiveFunction = new int*[i_size];
+    for (int i = 0; i < i_size; ++i) {
+        accumulationForObjectiveFunction[i] = new int[2];
+        for (int time = 0; time < 2; ++time) {
+                accumulationForObjectiveFunction[i][time] = historyValues[i][time];
+             }
+    }
+    
+    accumulationForSolela = new int[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        accumulationForSolela[j] = 0;
+    }
+
+    accumulationForShinGimel = new int[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        accumulationForShinGimel[j] = 0;
     }
 
     problemVariables = new int**[j_size];
@@ -106,6 +131,26 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return nightShifts[j];
     }
 
+    int calculateDifferenceInObjectiveFunction(int j, int k, int i) {
+        if(problemVariables[j][k][i] == 1){
+            int curVal = 0;
+            int updatedVal = 0;
+            int hold = 0;
+            if(isNight(j)) {
+                hold = accumulationForObjectiveFunction[i][1];
+                curVal = hold * hold * hold;
+                updatedVal = (hold + 1) * (hold + 1) * (hold + 1);
+            }
+            else {
+                hold = accumulationForObjectiveFunction[i][0];
+                curVal = hold * hold;
+                updatedVal = (hold + 1) * (hold + 1) ;
+            }
+            return (updatedVal - curVal);
+        }
+        return 0;
+    }
+
     int evaluateObjectiveFunction(int*** arr) {
         //print3DArray(problemVariables,j_size,k_size,i_size);
         int sum = 0;
@@ -115,12 +160,12 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             for (int j = 0; j < j_size; ++j) {
                 if(isNight(j)){
                     for (int k = 0; k < k_size; ++k) {
-                        night+= problemVariables[j][k][i];
+                        night+= arr[j][k][i];
                     }
                 }
                 else {
                     for (int k = 0; k < k_size; ++k) {
-                        day+= problemVariables[j][k][i];
+                        day+= arr[j][k][i];
                     }
                 }
             }
@@ -145,35 +190,68 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     }
 
 
-    bool checkEnoughSoldiersInSolela() {
-        for (int j = 0; j < j_size; ++j) {
-                int total = 0;
-                for (int i = 0; i < i_size; ++i) {
-                    total += problemVariables[j][0][i];
-                }
-                if(total < 2 && isNight(j))
-                    return false;
-                else if(total < 1 && !isNight(j))
-                    return false;
+    bool checkEnoughSoldiersInSolela(int j, int k, int i) {
+        // for (int j = 0; j < j_size; ++j) {
+        //         int total = 0;
+        //         for (int i = 0; i < i_size; ++i) {
+        //             total += problemVariables[j][0][i];
+        //         }
+        //         if(total < 2 && isNight(j))
+        //             return false;
+        //         else if(total < 1 && !isNight(j))
+        //             return false;
+        // }
+        // return true;
+        bool flag = problemVariables[j][k][i] == 1 && k == 0;
+        if(flag)
+            accumulationForSolela[j] ++;
+        for(int dim1 = 0; dim1<j_size; dim1++) {
+            if(accumulationForSolela[dim1] < 2 && isNight(dim1)){
+                if(flag)
+                    accumulationForSolela[j] --;
+                return false;
+            }
+            if(accumulationForSolela[dim1] < 1 && !isNight(dim1))
+            {
+                if(flag)
+                    accumulationForSolela[j] --;
+                return false;
+            }
         }
+        if(flag)
+            accumulationForSolela[j] --;
         return true;
+
     }
 
     bool isShinGimelNeeded(int j) {
         return shinGimelTimes[j] == 2;
     }
 
-    bool checkEnoughSoldiersInShinGimel() {
-        for (int j = 0; j < j_size; ++j) {
-                if(!isShinGimelNeeded(j))
-                    continue;
-                int total = 0;
-                for (int i = 0; i < i_size; ++i) {
-                    total += problemVariables[j][1][i];
-                }
-                if(total < 2)
-                    return false;
+    bool checkEnoughSoldiersInShinGimel(int j, int k, int i) {
+        // for (int j = 0; j < j_size; ++j) {
+        //         if(!isShinGimelNeeded(j))
+        //             continue;
+        //         int total = 0;
+        //         for (int i = 0; i < i_size; ++i) {
+        //             total += problemVariables[j][1][i];
+        //         }
+        //         if(total < 2)
+        //             return false;
+        // }
+        // return true;
+        bool flag = problemVariables[j][k][i] == 1 && k == 1;
+        if(flag)
+            accumulationForShinGimel[j] ++;
+        for (int dim1=0; dim1<j_size; dim1++) {
+            if(accumulationForShinGimel[dim1] < shinGimelTimes[dim1]){
+                if(flag)
+                    accumulationForShinGimel[j] --;
+                return false;
+            }
         }
+        if(flag)
+            accumulationForShinGimel[j] --;
         return true;
     }
 
@@ -201,54 +279,169 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         return true;
     }
 
-    void rec(int j, int k, int i,bool solela, bool shinGimel, bool commander, bool present, bool differentStations) {
+    bool minBreakToSoldier (int j, int k, int i) {
+        for(int dim1 = j-1; dim1 >= j-minShiftsBreak; dim1--) {
+            if(dim1 < 0)
+                break;
+            for(int dim2=0; dim2<k_size; dim2++) {
+                if(problemVariables[dim1][dim2][i] == 1)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    bool soldiersFromDifferentCrewsInShinGimel(int j, int k, int i) {
+        if(k == 1 && problemVariables[j][1][i] == 1){
+            int crewNumber = t[i];
+            for(int dim1 = 0; dim1< i_size; dim1++) {
+                if(t[dim1] == crewNumber && dim1 != i){
+                    if(problemVariables[j][1][dim1] == 1){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    bool notTooManySolelaPatrolers(int j,int k,int i) {
+        if(k==0 && problemVariables[j][k][i] == 1){
+            if(isNight(j) && (accumulationForSolela[j] + 1 > 2)) {
+                    return false;
+            }
+            else if(!isNight(j) && accumulationForSolela[j] + 1 > 1)
+                return false;
+        }
+        return true;
+    }
+
+     bool notTooManyShinGimelPatrolers(int j,int k,int i) {
+        if(k==1)
+            { 
+               if(accumulationForShinGimel[j] + 1 > shinGimelTimes[j])
+                return false;
+            }
+            return true;
+    }
+
+    void updateAccumulation(int j, int k, int i, int x) {
+        if (isNight(j)) {
+            accumulationForObjectiveFunction[i][1] += x;
+        }
+        else
+            accumulationForObjectiveFunction[i][0] += x;
+        if(x == 1) {
+            if(k==0)
+                accumulationForSolela[j] += 1;
+            else if(k==1)
+                accumulationForShinGimel[j] +=1;
+        }
+        if(x == -1) {
+            if(k==0)
+                accumulationForSolela[j] -= 1;
+            else if(k==1)
+                accumulationForShinGimel[j] -=1;
+        }
+    }
+    
+    void updatePatrolersAccumulation(int j, int k, int i, int x) {
+        if(x == 1) {
+            if(k==0)
+                accumulationForSolela[j] += 1;
+            else if(k==1)
+                accumulationForShinGimel[j] +=1;
+        }
+        if(x == -1) {
+            if(k==0)
+                accumulationForSolela[j] -= 1;
+            else if(k==1)
+                accumulationForShinGimel[j] -=1;
+        }
+    }
+
+    void rec(int j, int k, int i,bool solela, bool shinGimel, int acc) {
+        if(problemVariables[0][0][0] == 0)
+            cout<<"It is 0"<<endl;    
         if(sumOfRecursiveCalls % 100000000 == 0)
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
         sumOfRecursiveCalls ++;
         //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
         //print3DArray(problemVariables,j_size,k_size,i_size);
         problemVariables[j][k][i] = 1;
+
         bool cont = false;
-        if(!checkCommanderDoesntPatrol(j,k,i) && !cont) {
+        if(!cont && !checkCommanderDoesntPatrol(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
-        if(!soldierIsPresentIfPatrols(j,k,i) && !cont) {
+        if(!cont && !soldierIsPresentIfPatrols(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
-        if(!soldierDoesntPatrolAtDifferentPlacesSameTime(j,k,i) && !cont) {
+        if(!cont && !soldierDoesntPatrolAtDifferentPlacesSameTime(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        if(!cont && !minBreakToSoldier(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !soldiersFromDifferentCrewsInShinGimel(j,k,i)){
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !notTooManySolelaPatrolers(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !notTooManyShinGimelPatrolers(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        int diff = 0;
+        if(!cont) {
+            diff = calculateDifferenceInObjectiveFunction(j,k,i);
+            if(!(acc + diff < currentMinValue)){
+                problemVariables[j][k][i] = 0;
+                cont = true;
+            }
+        }
+    
         
         if(solela == false && !cont){
            // cout <<"a" <<endl;
-            solela = checkEnoughSoldiersInSolela();
+            solela = checkEnoughSoldiersInSolela(j,k,i);
             //cout <<"aa" <<endl;
-            
         } 
         
         if(shinGimel == false && !cont) {
            // cout <<"b" <<endl;
-            shinGimel = checkEnoughSoldiersInShinGimel();
+            shinGimel = checkEnoughSoldiersInShinGimel(j,k,i);
             //cout <<"bb" <<endl;
         }
 
         //reached a statisfiable configuration, check for optimality
         if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1 ) {
-            //cout <<"a" <<endl;
+            countWhatever++;
             int curVal = evaluateObjectiveFunction(problemVariables);
+            cout <<"satisfiable option: "<< countWhatever <<endl;
+            cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
+            cout<<"option's value: "<<curVal <<endl;
             //optimal
             if(curVal < currentMinValue){
                 //cout <<"s" <<endl;
+                currentMinValue = curVal;
                 deepCopyArr(problemVariables, currentBestAnswer,j_size,k_size,i_size);
             }
             //cout <<"aa" <<endl;
+            problemVariables[j][k][i] = 0;
             return;
         }
 
         //recursive step
+        solela = false;
+        shinGimel = false;
         if(i+1==i_size){
                 if(k+1==k_size){
                     if(j+1==j_size){
@@ -257,31 +450,33 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
                         return;
                     }
                     else {
-                        if(!cont)
-                            rec(j+1,0,0,solela,shinGimel,commander, present, differentStations);
-                        solela = false;
-                        shinGimel = false;
+                        if(!cont){
+                            updateAccumulation(j,k,i,1);
+                            rec(j+1,0,0,solela,shinGimel,acc + diff);
+                            updateAccumulation(j,k,i,-1);
+                        }
                         problemVariables[j][k][i] = 0;
-                        rec(j+1,0,0,solela,shinGimel,commander, present, differentStations);
+                        rec(j+1,0,0,solela,shinGimel,acc);
                     }
                 }
                 else {
-                    if(!cont)
-                            rec(j,k+1,0,solela,shinGimel,commander, present, differentStations);
-                        solela = false;
-                        shinGimel = false;
+                        if(!cont){
+                            updateAccumulation(j,k,i,1);
+                            rec(j,k+1,0,solela,shinGimel,acc + diff);
+                            updateAccumulation(j,k,i,-1);
+                        }
                         problemVariables[j][k][i] = 0;
-                        rec(j,k+1,0,solela,shinGimel,commander, present, differentStations);
-                   
+                        rec(j,k+1,0,solela,shinGimel,acc);
                 }
             }
             else {
-                if(!cont)
-                            rec(j,k,i+1,solela,shinGimel,commander, present, differentStations);
-                    solela = false;
-                    shinGimel = false;
+                    if(!cont){
+                        updateAccumulation(j,k,i,1);
+                        rec(j,k,i+1,solela,shinGimel,acc + diff);
+                        updateAccumulation(j,k,i,-1);
+                    }  
                     problemVariables[j][k][i] = 0;
-                    rec(j,k,i+1,solela,shinGimel,commander, present, differentStations); 
+                    rec(j,k,i+1,solela,shinGimel,acc); 
             }
             return;
     }
@@ -289,11 +484,18 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     void optimize() {
         //j_size = 2;
         cout<< " j_size: " << j_size << " k_size: " << k_size<< " i_size: " <<i_size<<endl;
-        initializeVariables();
-        
-        rec(0,0,0,false,false,true,true,true);
-        cout<< "total recursive calls: " << sumOfRecursiveCalls <<endl;
-        print3DArray(problemVariables,j_size,k_size,i_size);
+        initializeCalculation();
+        int startingSum = evaluateObjectiveFunction(problemVariables);
+        auto start = std::chrono::steady_clock::now();
+        rec(0,0,0,false,false,startingSum);
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double> duration = end - start;
+        std::cout << "Time taken: " << duration.count() << " seconds" << std::endl;
+        cout<< "Total recursive calls: " << sumOfRecursiveCalls <<endl;
+        cout<<"Starting Objective Function Evaluation: "<<startingSum <<endl;
+        cout << "Objective Function Evaluation For Result: "<< evaluateObjectiveFunction(currentBestAnswer) << endl;
+        print3DArray(currentBestAnswer,j_size,k_size,i_size);
     }
 
     //recieves 3 dimensions (int) of variables

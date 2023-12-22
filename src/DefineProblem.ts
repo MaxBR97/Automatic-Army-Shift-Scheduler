@@ -5,7 +5,7 @@ const addon = require( '../build/Release/OptimizationAlgorithmAPI.node');
 
 
 // Assuming the data.json file is in the 'data' directory
-const filePath = path.join(__dirname, '..', 'config.json');
+const filePath = path.join(__dirname, '..', 'input.json');
 const outputFile = 'expressionsOutput.json';
 const shiftsOutputFile = 'result.json';
 
@@ -16,6 +16,7 @@ Date.prototype.toJSON = function (): string {
     return this.toLocaleString();
 };
 
+let shuffleNames = false;
 let planUntil:Date = new Date();
 let planFrom:Date = new Date();
 let patrolIntervals:number; //in minutes
@@ -31,6 +32,8 @@ let crewToValueIndex:Map<string,number> = new Map();
     crewToValueIndex.set("1c",5);
     crewToValueIndex.set("2a",7);
     crewToValueIndex.set("2b",11);
+    crewToValueIndex.set("9",13);
+    crewToValueIndex.set("mapik",17);
 let problem : any= {
     variables: {} ,
     coefficients:{},
@@ -38,7 +41,7 @@ let problem : any= {
     objective: ''
 };
 
-async function parseConfigurationFile(): Promise<void>  {
+async function parseInputFile(): Promise<void>  {
     return new Promise<void>((resolve,reject) => {
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
@@ -65,6 +68,8 @@ async function parseConfigurationFile(): Promise<void>  {
             problem.coefficients["m"] = []
             problem.coefficients["t"] = []
             problem.coefficients["s"] = []
+            if(shuffleNames)
+                shuffleArray(jsonData.soldiers);
             jsonData.soldiers.forEach((soldier, i) => {
                 indexToNameMap.set(i,soldier.name)
                 nameToIndexMap.set(soldier.name,i);
@@ -106,24 +111,28 @@ async function parseConfigurationFile(): Promise<void>  {
             })
             
             jsonData.history.solela.forEach((entry) => {
-                let index = nameToIndexMap.get(entry.name)
-                if(index>=0){
-                    let hold = historyEvaluationMap.get(index)
-                    let curDay = hold.day ? hold.day : 0;
-                    let curNight = hold.night ? hold.night : 0;
-                    isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight+1) : hold.day = (curDay + 1);
-                    
-                }
+                entry.names.forEach( (name) => {
+                    let index = nameToIndexMap.get(name)
+                    if(index>=0){
+                        let hold = historyEvaluationMap.get(index)
+                        let curDay = hold.day ? hold.day : 0;
+                        let curNight = hold.night ? hold.night : 0;
+                        isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight+1) : hold.day = (curDay + 1);
+                        
+                    }
+                })
             })
 
             jsonData.history.shinGimel.forEach((entry) => {
-                let index = nameToIndexMap.get(entry.name)
-                if(index>=0){
-                    let hold = historyEvaluationMap.get(index)
-                    let curDay = hold.day ? hold.day : 0;
-                    let curNight = hold.night ? hold.night : 0;
-                    isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight+1) : hold.day = (curDay + 1);
-                }
+                entry.names.forEach( (name) => {
+                    let index = nameToIndexMap.get(name)
+                    if(index>=0){
+                        let hold = historyEvaluationMap.get(index)
+                        let curDay = hold.day ? hold.day : 0;
+                        let curNight = hold.night ? hold.night : 0;
+                        isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight+1) : hold.day = (curDay + 1);
+                    }
+                })
             })
 
             if (!problem.constraints) {
@@ -201,7 +210,7 @@ async function parseConfigurationFile(): Promise<void>  {
                 }
             })
             
-            console.log("Finished parsing config file")
+            console.log("Finished parsing input file")
             resolve()
         } catch (error) {
             console.error('Error parsing JSON:', error);
@@ -359,7 +368,7 @@ function soldierAllowedToBeAtMaximumOneStationAtOnce(j: any, i: number) {
     throw new Error('Function not implemented.');
 }
 
-parseConfigurationFile().then(() => {
+parseInputFile().then(() => {
     let optimizationProblem = {
         objective: problem.objective,
         constraints: problem.constraints,
@@ -368,7 +377,7 @@ parseConfigurationFile().then(() => {
     
     writeObjectToFile(optimizationProblem, outputFile);
     const solution = prepareProblemDomainAndSolve();
-    console.log(solution);
+    //console.log(solution);
     unparseSolution(solution);
     
     // solveBinaryOptimizationProblem(optimizationProblem)
@@ -380,4 +389,13 @@ parseConfigurationFile().then(() => {
     // });
 });
 
+
+function shuffleArray(array: any) {
+   for(var i = array.length - 1; i>0; i--) {
+        var j = Math.floor(Math.random() * (i+1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+   }
+}
 

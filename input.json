@@ -1,10 +1,397 @@
 {
-    "objective": "(z[0][0][0] + z[1][1][1] + z[2][1][1]) ** 3",
-    "constraints":{ "a": [
-      "z[0][0][0] + z[1][1][1] - 1 >= 0",
-      "z[1][1][1] + z[2][2][2] - 1 >= 0"
-      ] 
-    },
-    "dimensions" : {"j":3, "k":3, "i":3}
-  }
-  
+    "planFrom" : "December 22, 2023 13:30:00",
+    "planUntil": "December 23, 2023 15:00:00",
+    "patrolIntervals": 90,
+    "nightPatrolTime":{
+                        "from": "21:00:00",
+                        "until" :"06:00:00"
+                    },
+    "shinGimelTimes": [
+            {
+                "from": "December 15, 2023 00:00:00",
+                "until": "December 15, 2023 18:00:00"
+            }
+        ],
+    "readyWithDawnTime" : "05:30:00",
+    "soldiers" : 
+        [
+            { 
+                "name":"Hen Dahan",
+                "commanderTimes": [
+                ],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "December 31, 2023 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Israel",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":true, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Arik",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Reuven Priente",
+                "commanderTimes": [],
+                "isMT":true, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Volitski",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ron Yoffe",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Avihai",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ben Hemo",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Raiffer",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Nosatski",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Yemilian",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Hanan",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Zaslevsky",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Sheshar",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Vaknin",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Amira",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Sofer",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Daniel Vaille",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Uzan",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Kraiter",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Doron",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Nahar",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Yargan",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Fresburger",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            }
+
+        ],
+    "readyWithDawnDates" :
+    [
+        {"crew": "1a", "date":"2023,12,13"},
+        {"crew": "1b", "date":"2023,12,13"}
+    ],
+    "history":
+        {
+            "solela":
+                [
+                    {
+                        "names":["Hen"],
+                        "time":"December 21, 2023 10:30:00"
+                    },
+                    {
+                        "names":["Israel"],
+                        "time":"December 21, 2023 12:00:00"
+                    },
+                    {
+                        "names":["Arik"],
+                        "time":"December 21, 2023 13:30:00"
+                    },
+                    {
+                        "names":["Reuven Priente"],
+                        "time":"December 21, 2023 15:00:00"
+                    },
+                    {
+                        "names":["Volitski"],
+                        "time":"December 21, 2023 16:30:00"
+                    },
+                    {
+                        "names":["Yoffe"],
+                        "time":"December 21, 2023 18:00:00"
+                    },
+                    {
+                        "names":["Avihai"],
+                        "time":"December 21, 2023 19:30:00"
+                    },
+                    {
+                        "names":["Raiffer", "Nosatski"],
+                        "time":"December 21, 2023 21:00:00"
+                    },
+                    {
+                        "names":["Yemilian","Hanan"],
+                        "time":"December 21, 2023 22:30:00"
+                    },
+                    {
+                        "names":["Zaslevsky", "Sheshar"],
+                        "time":"December 22, 2023 00:00:00"
+                    },
+                    {
+                        "names":["Vaknin","Amira"],
+                        "time":"December 22, 2023 01:30:00"
+                    },
+                    {
+                        "names":["Vaille","Sofer"],
+                        "time":"December 22, 2023 03:00:00"
+                    },
+                    {
+                        "names":["Ben Hemo", "Uzan"],
+                        "time":"December 22, 2023 04:30:00"
+                    },
+                    {
+                        "names":["Kraiter"],
+                        "time":"December 22, 2023 06:00:00"
+                    },
+                    {
+                        "names":["Doron"],
+                        "time":"December 22, 2023 07:30:00"
+                    },
+                    {
+                        "names":["Nahar"],
+                        "time":"December 22, 2023 09:00:00"
+                    },
+                    {
+                        "names":["Yargan"],
+                        "time":"December 22, 2023 10:30:00"
+                    },
+                    {
+                        "names":["Fresburger"],
+                        "time":"December 22, 2023 12:00:00"
+                    }
+                ],
+            "shinGimel":
+                    [
+                        
+                    ]
+        }
+    
+}
