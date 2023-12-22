@@ -1,0 +1,5 @@
+{
+    "shuffleNames" : true,
+    "numberOfIterations" : 1,
+    "maxRecursionsPerIteration" : 100000
+}

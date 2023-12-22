@@ -32,6 +32,7 @@ namespace demo {
     int* accumulationForShinGimel = nullptr;
     long sumOfRecursiveCalls = 0;
     int countWhatever = 0;
+    long maxRecursions = 1000000000000;
 
 
     int minShiftsBreak = 4;
@@ -52,6 +53,7 @@ void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
 
 
 void initializeCalculation() {
+    sumOfRecursiveCalls = 0;
     delete3DArray(currentBestAnswer,j_size,k_size,i_size);
     delete3DArray(problemVariables, j_size, k_size, i_size);
 
@@ -174,6 +176,83 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             day = day*day;
             night = night*night*night;
             int soldierSum = day+night;
+            sum = sum + soldierSum;
+        }
+        return sum;
+}
+
+ int calculateDifferenceInObjectiveFunction2(int j, int k, int i) {
+        if(problemVariables[j][k][i] == 1){
+            int curVal = 0;
+            int updatedVal = 0;
+            int hold = 0;
+            int spaceFromLastPatrol = 0;
+            for(int dim1 = j-1; dim1>=0; dim1 --) {
+                bool flag = false;
+                for(int dim2 = 0; dim2<k_size; dim2++) {
+                    if(problemVariables[dim1][dim2][i] == 1) {
+                        spaceFromLastPatrol = j-dim1;
+                        flag = true;
+                        break;
+                    }
+                }
+                if(flag)
+                    break;
+            }
+            if(isNight(j)) {
+                hold = accumulationForObjectiveFunction[i][1];
+                curVal = hold * hold * hold * hold;
+                updatedVal = (hold + 1) * (hold + 1) * (hold + 1) * (hold + 1);
+            }
+            else {
+                hold = accumulationForObjectiveFunction[i][0];
+                curVal = hold * hold;
+                updatedVal = (hold + 1) * (hold + 1) ;
+            }
+            updatedVal += spaceFromLastPatrol * spaceFromLastPatrol * spaceFromLastPatrol;
+            return (updatedVal - curVal);
+        }
+        return 0;
+    }
+
+    int evaluateObjectiveFunction2(int*** arr) {
+        //print3DArray(problemVariables,j_size,k_size,i_size);
+        int sum = 0;
+        for (int i = 0; i < i_size; ++i) {
+            int day = 0;
+            int night = 0;
+            int spaceFromLastPatrolSum = 0;
+            for (int j = 0; j < j_size; ++j) {
+                if(isNight(j)){
+                    for (int k = 0; k < k_size; ++k) {
+                        night+= arr[j][k][i];
+                    }
+                }
+                else {
+                    for (int k = 0; k < k_size; ++k) {
+                        day+= arr[j][k][i];
+                    }
+                }
+                if(arr[j][0][i] == 1 || arr[j][1][i] == 1) {
+                    for(int dim1 = j-1; dim1>=0; dim1 --) {
+                        bool flag = false;
+                        for(int dim2 = 0; dim2<k_size; dim2++) {
+                            if(problemVariables[dim1][dim2][i] == 1) {
+                                spaceFromLastPatrolSum += (j-dim1) * (j-dim1) * (j-dim1);
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if(flag)
+                            break;
+                    }
+                }
+            }
+            day += historyValues[i][0];
+            night += historyValues[i][1];
+            day = day*day;
+            night = night*night*night*night;
+            int soldierSum = day + night + spaceFromLastPatrolSum;
             sum = sum + soldierSum;
         }
         return sum;
@@ -365,20 +444,25 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             cout<<"It is 0"<<endl;    
         if(sumOfRecursiveCalls % 100000000 == 0)
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
+        if(sumOfRecursiveCalls > maxRecursions)
+           return;
         sumOfRecursiveCalls ++;
         //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
         //print3DArray(problemVariables,j_size,k_size,i_size);
         problemVariables[j][k][i] = 1;
 
         bool cont = false;
-        if(!cont && !checkCommanderDoesntPatrol(j,k,i)) {
+        if(!cont && !notTooManySolelaPatrolers(j,k,i)) {
             problemVariables[j][k][i] = 0;
+            i = i_size - 1;
             cont = true;
         }
-        if(!cont && !soldierIsPresentIfPatrols(j,k,i)) {
+        if(!cont && !notTooManyShinGimelPatrolers(j,k,i)) {
             problemVariables[j][k][i] = 0;
+            i = i_size - 1;
             cont = true;
         }
+        
         if(!cont && !soldierDoesntPatrolAtDifferentPlacesSameTime(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
@@ -387,15 +471,15 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        if(!cont && !checkCommanderDoesntPatrol(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !soldierIsPresentIfPatrols(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
         if(!cont && !soldiersFromDifferentCrewsInShinGimel(j,k,i)){
-            problemVariables[j][k][i] = 0;
-            cont = true;
-        }
-        if(!cont && !notTooManySolelaPatrolers(j,k,i)) {
-            problemVariables[j][k][i] = 0;
-            cont = true;
-        }
-        if(!cont && !notTooManyShinGimelPatrolers(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
@@ -403,8 +487,10 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         if(!cont) {
             diff = calculateDifferenceInObjectiveFunction(j,k,i);
             if(!(acc + diff < currentMinValue)){
+                //countWhatever++;
                 problemVariables[j][k][i] = 0;
                 cont = true;
+               // cout<<"didnt pass number: " << countWhatever << "value was: " << acc+diff << "while minimum is: "<<currentMinValue << "iteration : "<<sumOfRecursiveCalls<< endl;
             }
         }
     
@@ -423,11 +509,11 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
 
         //reached a statisfiable configuration, check for optimality
         if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1 ) {
-            countWhatever++;
             int curVal = evaluateObjectiveFunction(problemVariables);
-            cout <<"satisfiable option: "<< countWhatever <<endl;
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
-            cout<<"option's value: "<<curVal <<endl;
+            cout<<"option's value: "<<curVal <<" which is equivalent to: " << evaluateObjectiveFunction(problemVariables) <<endl;
+            if(curVal != acc + calculateDifferenceInObjectiveFunction(j,k,i))
+                cout << "ERROR" <<endl;
             //optimal
             if(curVal < currentMinValue){
                 //cout <<"s" <<endl;
@@ -495,7 +581,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         cout<< "Total recursive calls: " << sumOfRecursiveCalls <<endl;
         cout<<"Starting Objective Function Evaluation: "<<startingSum <<endl;
         cout << "Objective Function Evaluation For Result: "<< evaluateObjectiveFunction(currentBestAnswer) << endl;
-        print3DArray(currentBestAnswer,j_size,k_size,i_size);
+        //print3DArray(currentBestAnswer,j_size,k_size,i_size);
     }
 
     //recieves 3 dimensions (int) of variables
@@ -611,6 +697,85 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     return nullptr;
 
 }
+
+    napi_value GetResultObjectiveValue(napi_env env, napi_callback_info info) {
+    // Create a JavaScript number with the value of x_var
+    napi_value result;
+    napi_create_int32(env, currentMinValue, &result);
+
+    return result;
+    }
+
+    napi_value GlobalSetter(napi_env env, napi_callback_info info) {
+    // Get the number of arguments passed to the function
+    size_t argc = 2;
+    napi_value args[2];
+
+    // Parse the arguments
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // Check if two arguments are passed
+    if (argc != 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
+        return nullptr;
+    }
+
+    // Extract number from the first argument
+    int64_t num = 0;
+    napi_get_value_int64(env, args[0], &num);
+
+    // Extract string from the second argument
+    size_t strSize = 0;
+    napi_get_value_string_utf8(env, args[1], nullptr, 0, &strSize);
+    std::string str(strSize + 1, '\0');
+    napi_get_value_string_utf8(env, args[1], &str[0], strSize + 1, nullptr);
+
+    // Check if the string equals "abc" and set the number to the global variable x_var
+    if (str.compare("setMin") ) {
+        currentMinValue = static_cast<int>(num);
+    }
+
+    // Return undefined
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+ napi_value SetMaxRecursions(napi_env env, napi_callback_info info) {
+    // Get the number of arguments passed to the function
+    size_t argc = 2;
+    napi_value args[2];
+
+    // Parse the arguments
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // Check if two arguments are passed
+    if (argc != 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
+        return nullptr;
+    }
+
+    // Extract number from the first argument
+    int64_t num = 0;
+    napi_get_value_int64(env, args[0], &num);
+
+    // Extract string from the second argument
+    size_t strSize = 0;
+    napi_get_value_string_utf8(env, args[1], nullptr, 0, &strSize);
+    std::string str(strSize + 1, '\0');
+    napi_get_value_string_utf8(env, args[1], &str[0], strSize + 1, nullptr);
+
+    // Check if the string equals "abc" and set the number to the global variable x_var
+    if (str.compare("setMaxRecursions") ) {
+        maxRecursions = static_cast<long>(num);
+    }
+
+    // Return undefined
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
     // recieves 2D array, and its 2 dimensions
     napi_value SetU(napi_env env, napi_callback_info info) {
     napi_status status;
@@ -774,7 +939,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             s[i][j] = value;
         }
     }
-    print2DArray(s,dim1,dim2);
+    //print2DArray(s,dim1,dim2);
     return nullptr;
     
     }
@@ -859,7 +1024,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             k[i][j] = value;
         }
     }
-    print2DArray(k,dim1,dim2);
+    //print2DArray(k,dim1,dim2);
     return nullptr;
 }
     //recieves 2D array and its 2 dimensions
@@ -942,7 +1107,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             m[i][j] = value;
         }
     }
-    print2DArray(m,dim1,dim2);
+    //print2DArray(m,dim1,dim2);
     return nullptr;
     }
 
@@ -1013,9 +1178,9 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             nightShifts[i] = value;
         
     }
-    for(int as=0; as<dim1; as++){
-        cout<< nightShifts[as] << endl;
-    }
+    // for(int as=0; as<dim1; as++){
+    //     cout<< nightShifts[as] << endl;
+    // }
     return nullptr;
 }
     
@@ -1086,7 +1251,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             shinGimelTimes[i] = value;
         
     }
-    print1DArray(shinGimelTimes,dim1);
+    //print1DArray(shinGimelTimes,dim1);
     return nullptr;
 }
 
@@ -1170,7 +1335,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             historyValues[i][j] = value;
         }
     }
-    print2DArray(historyValues,dim1,dim2);
+    //print2DArray(historyValues,dim1,dim2);
     return nullptr;
     }
 
@@ -1246,8 +1411,23 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     napi_value Init(napi_env env, napi_value exports) {
         napi_status status;
 
-        napi_value spv, sns, sh, sst, ss, sm, st, sk, su, s;
+        napi_value spv, sns, sh, sst, ss, sm, st, sk, su, s,grov, gs,smr;
         status = napi_create_function(env, nullptr, 0, SetProblemVariables, nullptr, &spv);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+        status = napi_create_function(env, nullptr, 0, SetMaxRecursions, nullptr, &smr);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+        status = napi_create_function(env, nullptr, 0, GetResultObjectiveValue, nullptr, &grov);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+        status = napi_create_function(env, nullptr, 0, GlobalSetter, nullptr, &gs);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to create function");
             return nullptr;
@@ -1313,7 +1493,22 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
         }
+        status = napi_set_named_property(env, exports, "setMaxRecursions", smr);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
+            return nullptr;
+        }
 
+        status = napi_set_named_property(env, exports, "getResultObjectiveValue", grov);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
+            return nullptr;
+        }
+        status = napi_set_named_property(env, exports, "globalSetter", gs);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
+            return nullptr;
+        }
         status = napi_set_named_property(env, exports, "setM", sm);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");

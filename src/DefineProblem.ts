@@ -8,6 +8,7 @@ const addon = require( '../build/Release/OptimizationAlgorithmAPI.node');
 const filePath = path.join(__dirname, '..', 'input.json');
 const outputFile = 'expressionsOutput.json';
 const shiftsOutputFile = 'result.json';
+const configurationFile = 'config.json';
 
 Date.prototype.toString = function (): string {
     return this.toLocaleString();
@@ -16,7 +17,9 @@ Date.prototype.toJSON = function (): string {
     return this.toLocaleString();
 };
 
-let shuffleNames = false;
+let maxRecursions = 1000000000;
+let numberOfIterations = 1;
+let shuffleNames = true;
 let planUntil:Date = new Date();
 let planFrom:Date = new Date();
 let patrolIntervals:number; //in minutes
@@ -280,8 +283,8 @@ function prepareProblemDomainAndSolve() {
 
     for(let i = 0; i < historyEvaluationMap.size; i ++) {
         historyValues[i] = []
-        historyValues[i][0] = historyEvaluationMap.get(i).day;
-        historyValues[i][1] = historyEvaluationMap.get(i).night;
+        historyValues[i][0] = historyEvaluationMap.get(i).day + 1;
+        historyValues[i][1] = historyEvaluationMap.get(i).night + 1;
     }
 
     problem.variables["z"].forEach( (patrolTime, j) => {
@@ -293,22 +296,22 @@ function prepareProblemDomainAndSolve() {
     })
     
     
-    console.log("vars dimensions: ", problem.variables["z"].length, 2 , problem.coefficients["m"].length)
+    //console.log("vars dimensions: ", problem.variables["z"].length, 2 , problem.coefficients["m"].length)
     addon.setProblemVariables(problem.variables["z"].length, 2 ,problem.coefficients["m"].length)
-    console.log("t: ",problem.coefficients["t"])
+    //console.log("t: ",problem.coefficients["t"])
     addon.setT(problem.coefficients["t"], problem.coefficients["t"].length)
-    console.log("m: ",problem.coefficients["m"])
+    //console.log("m: ",problem.coefficients["m"])
     addon.setM(problem.coefficients["m"], problem.coefficients["m"].length, problem.coefficients["m"][0].length)
-    console.log("k: ",problem.coefficients["k"])
+    //console.log("k: ",problem.coefficients["k"])
     addon.setK(problem.coefficients["k"], problem.coefficients["k"].length, problem.coefficients["k"][0].length)
     //addon.setU(problem.coefficients["u"], problem.coefficients["u"].length, problem.coefficients["u"][0].length)
-    console.log("s: ",problem.coefficients["s"])
+    //console.log("s: ",problem.coefficients["s"])
     addon.setS(problem.coefficients["s"], problem.coefficients["s"].length, problem.coefficients["s"][0].length)
-    console.log("nightShifts: ",nightShifts)
+    //console.log("nightShifts: ",nightShifts)
     addon.setNightShifts(nightShifts, nightShifts.length)
-    console.log("historyValues: ",historyValues)
+    //console.log("historyValues: ",historyValues)
     addon.setHistory(historyValues,historyValues.length, 2)
-    console.log("shinGimelTimes: ", shinGimelTimes);
+    //console.log("shinGimelTimes: ", shinGimelTimes);
     addon.setShinGimelTimes(shinGimelTimes,shinGimelTimes.length);
     const solution = addon.solve(); //solution is a 3d array
     return solution;
@@ -368,6 +371,25 @@ function soldierAllowedToBeAtMaximumOneStationAtOnce(j: any, i: number) {
     throw new Error('Function not implemented.');
 }
 
+fs.readFile(configurationFile, 'utf8', (err, data) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+        try {
+            const configData = JSON.parse(data);
+            shuffleNames = configData.shuffleNames;
+            numberOfIterations = configData.numberOfIterations;
+            maxRecursions = configData.maxRecursionsPerIteration;
+            //minimumShiftRest = 
+        } catch{
+            console.log("error parsing config file")
+        }
+        
+    });
+let bestMin = 99999999;
+for(let iterations = 0; iterations < numberOfIterations; iterations ++){
 parseInputFile().then(() => {
     let optimizationProblem = {
         objective: problem.objective,
@@ -375,10 +397,17 @@ parseInputFile().then(() => {
         dimensions: {j:problem.variables["z"].length,k:2,i:nameToIndexMap.size}
     };
     
-    writeObjectToFile(optimizationProblem, outputFile);
+    //writeObjectToFile(optimizationProblem, outputFile);
+    addon.globalSetter(bestMin, "setMin");
+    addon.setMaxRecursions(maxRecursions,"setMaxRecursions")
     const solution = prepareProblemDomainAndSolve();
-    //console.log(solution);
-    unparseSolution(solution);
+    let hold = addon.getResultObjectiveValue();
+    console.log("result value: ",hold)
+    if(hold < bestMin)
+        {
+            bestMin = hold;
+            unparseSolution(solution);
+        }
     
     // solveBinaryOptimizationProblem(optimizationProblem)
     // .then((solution) => {
@@ -388,7 +417,7 @@ parseInputFile().then(() => {
     //     console.error('Error:', error);
     // });
 });
-
+}
 
 function shuffleArray(array: any) {
    for(var i = array.length - 1; i>0; i--) {
