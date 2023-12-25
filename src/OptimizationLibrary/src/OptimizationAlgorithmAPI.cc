@@ -4,7 +4,7 @@
 #include <string.h>
 #include <cstring>
 #include <chrono>
-
+#include <random>
 
 //int*** problemVariables = nullptr; // Declare the global variable
 namespace demo {
@@ -32,73 +32,35 @@ namespace demo {
     int* accumulationForShinGimel = nullptr;
     long sumOfRecursiveCalls = 0;
     int countWhatever = 0;
-    long maxRecursions = 1000000000000;
+    long maxRecursions = 100000000000;
+    int randomizedSolutions = 2000;
+    int minShiftsBreak = 10;
 
 
-    int minShiftsBreak = 4;
-
-    #include <iostream>
-
-void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
-    if(arr != nullptr) {
-    for (int i = 0; i < dim1; ++i) {
-        for (int j = 0; j < dim2; ++j) {
-            delete[] arr[i][j];
-        }
-        delete[] arr[i];
-    }
-    delete[] arr;
-    }
-}
-
-
-void initializeCalculation() {
-    sumOfRecursiveCalls = 0;
-    delete3DArray(currentBestAnswer,j_size,k_size,i_size);
-    delete3DArray(problemVariables, j_size, k_size, i_size);
-
-    currentBestAnswer = new int**[j_size];
-    for (int j = 0; j < j_size; ++j) {
-        currentBestAnswer[j] = new int*[k_size];
-        for (int k = 0; k < k_size; ++k) {
-            currentBestAnswer[j][k] = new int[i_size];
-            for (int i = 0; i < i_size; ++i) {
-                //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
-                currentBestAnswer[j][k][i] = -1;
-            }
-        }
-    }
-
-    accumulationForObjectiveFunction = new int*[i_size];
-    for (int i = 0; i < i_size; ++i) {
-        accumulationForObjectiveFunction[i] = new int[2];
-        for (int time = 0; time < 2; ++time) {
-                accumulationForObjectiveFunction[i][time] = historyValues[i][time];
-             }
-    }
+int getRandomNumber() {
+    // Seed the random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
     
-    accumulationForSolela = new int[j_size];
-    for (int j = 0; j < j_size; ++j) {
-        accumulationForSolela[j] = 0;
-    }
-
-    accumulationForShinGimel = new int[j_size];
-    for (int j = 0; j < j_size; ++j) {
-        accumulationForShinGimel[j] = 0;
-    }
-
-    problemVariables = new int**[j_size];
-    for (int j = 0; j < j_size; ++j) {
-        problemVariables[j] = new int*[k_size];
-        for (int k = 0; k < k_size; ++k) {
-            problemVariables[j][k] = new int[i_size];
-            for (int i = 0; i < i_size; ++i) {
-                //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
-                problemVariables[j][k][i] = 0;
-            }
-        }
-    }
+    // Generate a random number between 0 and 1
+    std::uniform_int_distribution<> distrib(0, 1);
+    return distrib(gen);
 }
+
+bool getRandomBoolean () {
+    if(getRandomNumber() == 1)
+        return true;
+    else
+        return false;
+}
+
+int flipNumber(int x) {
+    if(x==0)
+        return 1;
+    else
+        return 0;
+}
+
 
 void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     for (int i = 0; i < dim1; ++i) {
@@ -129,6 +91,88 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         }
     }
     
+
+
+void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
+    if(arr != nullptr) {
+    for (int i = 0; i < dim1; ++i) {
+        for (int j = 0; j < dim2; ++j) {
+            delete[] arr[i][j];
+        }
+        delete[] arr[i];
+    }
+    delete[] arr;
+    }
+}
+
+
+void initializeCalculation() {
+    sumOfRecursiveCalls = 0;
+    //delete3DArray(currentBestAnswer,j_size,k_size,i_size);
+    delete3DArray(problemVariables, j_size, k_size, i_size);
+    bool init = false;
+
+    if(currentBestAnswer == nullptr){
+        currentBestAnswer = new int**[j_size];
+        for (int j = 0; j < j_size; ++j) {
+           
+                currentBestAnswer[j] = new int*[k_size];
+            for (int k = 0; k < k_size; ++k) {
+              
+                currentBestAnswer[j][k] = new int[i_size];
+                for (int i = 0; i < i_size; ++i) {
+                    //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
+                    currentBestAnswer[j][k][i] = -1;
+                }
+            }
+        }
+    }
+ 
+    if(accumulationForObjectiveFunction == nullptr)
+        init = true;
+    if(init)
+        accumulationForObjectiveFunction = new int*[i_size];
+    for (int i = 0; i < i_size; ++i) {
+        if(init)
+            accumulationForObjectiveFunction[i] = new int[2];
+        for (int time = 0; time < 2; ++time) {
+                  accumulationForObjectiveFunction[i][time] = historyValues[i][time];
+            }
+     }
+     //print2DArray(accumulationForObjectiveFunction,i_size,2);
+    
+  
+    if(accumulationForSolela == nullptr)
+        accumulationForSolela = new int[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        accumulationForSolela[j] = 0;
+    }
+    if(accumulationForShinGimel == nullptr)
+        accumulationForShinGimel = new int[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        accumulationForShinGimel[j] = 0;
+    }
+
+    init = true;
+    if(problemVariables == nullptr)
+        init = true;
+    if(init)
+        problemVariables = new int**[j_size];
+    for (int j = 0; j < j_size; ++j) {
+        if(init)
+            problemVariables[j] = new int*[k_size];
+        for (int k = 0; k < k_size; ++k) {
+            if(init)
+                problemVariables[j][k] = new int[i_size];
+            for (int i = 0; i < i_size; ++i) {
+                //cout<< " j_size: " << j << " k_size: " << k<< " i_size: " <<i<<endl;
+                problemVariables[j][k][i] = 0;
+            }
+        }
+    }
+    //print3DArray(problemVariables,j_size,k_size,i_size);
+}
+
     bool isNight(int j) {
         return nightShifts[j];
     }
@@ -439,10 +483,189 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
         }
     }
 
+    void randomizedSolution(int j, int k, int i,bool solela, bool shinGimel, int acc, bool &stop, bool skipFirst) {  
+        sumOfRecursiveCalls ++;
+        //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
+        //print3DArray(problemVariables,j_size,k_size,i_size);
+        if(stop || sumOfRecursiveCalls > 10000 ){
+            return;
+        }
+    
+        problemVariables[j][k][i] = 1;
+
+        bool cont = false;
+        if(skipFirst)
+            cont = true;
+        if(!cont && !notTooManySolelaPatrolers(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            i = i_size - 1;
+            cont = true;
+        }
+        if(!cont && !notTooManyShinGimelPatrolers(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            i = i_size - 1;
+            cont = true;
+        }
+        
+        if(!cont && !soldierDoesntPatrolAtDifferentPlacesSameTime(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !minBreakToSoldier(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !checkCommanderDoesntPatrol(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !soldierIsPresentIfPatrols(j,k,i)) {
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        if(!cont && !soldiersFromDifferentCrewsInShinGimel(j,k,i)){
+            problemVariables[j][k][i] = 0;
+            cont = true;
+        }
+        int diff = 0;
+        if(!cont) {
+            diff = calculateDifferenceInObjectiveFunction(j,k,i);
+            if(!(acc + diff < currentMinValue)){
+                //countWhatever++;
+                problemVariables[j][k][i] = 0;
+                cont = true;
+               // cout<<"didnt pass number: " << countWhatever << "value was: " << acc+diff << "while minimum is: "<<currentMinValue << "iteration : "<<sumOfRecursiveCalls<< endl;
+            }
+        }
+    
+        
+        if(solela == false && !cont){
+           // cout <<"a" <<endl;
+            solela = checkEnoughSoldiersInSolela(j,k,i);
+            //cout <<"aa" <<endl;
+        } 
+        
+        if(shinGimel == false && !cont) {
+           // cout <<"b" <<endl;
+            shinGimel = checkEnoughSoldiersInShinGimel(j,k,i);
+            //cout <<"bb" <<endl;
+        }
+
+        //reached a statisfiable configuration, check for optimality
+        if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1 ) {
+            int curVal = evaluateObjectiveFunction(problemVariables);
+            cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
+            cout<<"option's value: "<<curVal <<" and in the accumulative style it is: " << acc + calculateDifferenceInObjectiveFunction(j,k,i) <<endl;
+            if(curVal != acc + calculateDifferenceInObjectiveFunction(j,k,i))
+                cout << "ERROR" <<endl;
+            //optimal
+            if(curVal < currentMinValue){
+                //cout <<"s" <<endl;
+                currentMinValue = curVal;
+                deepCopyArr(problemVariables, currentBestAnswer,j_size,k_size,i_size);
+            }
+            //cout <<"aa" <<endl;
+            problemVariables[j][k][i] = 0;
+            stop = true;
+            return;
+        }
+
+        //recursive step
+        solela = false;
+        shinGimel = false;
+        if(i+1==i_size){
+                if(k+1==k_size){
+                    if(j+1==j_size){
+                        //cout<<"reached the end"<<endl;
+                        problemVariables[j][k][i] = 0;
+                        return;
+                    }
+                    else {
+                        if(!cont){
+                                    int rnd = getRandomNumber();
+                            if(rnd == 1){
+                                problemVariables[j][k][i] = 1;
+                                updateAccumulation(j,k,i,1);
+                                randomizedSolution(j+1,0,0,solela,shinGimel,acc + diff,stop, false);
+                                updateAccumulation(j,k,i,-1);
+                                problemVariables[j][k][i] = 0;
+                                randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop,false);
+                            }
+                            else {
+                                problemVariables[j][k][i] = 0;
+                                randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop,false);
+                                problemVariables[j][k][i] = 1;
+                                updateAccumulation(j,k,i,1);
+                                randomizedSolution(j+1,0,0,solela,shinGimel,acc + diff,stop, false);
+                                updateAccumulation(j,k,i,-1);
+                            }
+                        }
+                        else {
+                            problemVariables[j][k][i] = 0;
+                            randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
+                        }
+                    }
+                }
+                else {
+                        if(!cont){
+                                int rnd = getRandomNumber();
+                            if(rnd == 1){
+                                problemVariables[j][k][i] = 1;
+                                updateAccumulation(j,k,i,1);
+                                randomizedSolution(j,k+1,0,solela,shinGimel,acc + diff,stop, false);
+                                updateAccumulation(j,k,i,-1);
+                                problemVariables[j][k][i] = 0;
+                                randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop, false);
+                            }
+                            else {
+                                problemVariables[j][k][i] = 0;
+                                randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop,false);
+                                problemVariables[j][k][i] = 1;
+                                updateAccumulation(j,k,i,1);
+                                randomizedSolution(j,k+1,0,solela,shinGimel,acc + diff,stop, false);
+                                updateAccumulation(j,k,i,-1);
+                            }
+                        }
+                        else {
+                            problemVariables[j][k][i] = 0;
+                            randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
+                        }
+                }
+            }
+            else {
+                    if(!cont){
+                        int rnd = getRandomNumber();
+                        if(rnd == 1){
+                            problemVariables[j][k][i] = 1;
+                            updateAccumulation(j,k,i,1);
+                            randomizedSolution(j,k,i+1,solela,shinGimel,acc + diff,stop,false);
+                            updateAccumulation(j,k,i,-1);
+                            problemVariables[j][k][i] = 0;
+                            randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop,false);
+                        }
+                        else {
+                            problemVariables[j][k][i] = 0;
+                            randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop,false);
+                            problemVariables[j][k][i] = 1;
+                            updateAccumulation(j,k,i,1);
+                            randomizedSolution(j,k,i+1,solela,shinGimel,acc + diff,stop,false);
+                            updateAccumulation(j,k,i,-1);
+                        }
+                    }  else {
+                        problemVariables[j][k][i] = 0;
+                        randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean()); 
+                    }
+            }
+            problemVariables[j][k][i] = 0;
+            return;
+    }
+
+
     void rec(int j, int k, int i,bool solela, bool shinGimel, int acc) {
-        if(problemVariables[0][0][0] == 0)
-            cout<<"It is 0"<<endl;    
-        if(sumOfRecursiveCalls % 100000000 == 0)
+        // if(problemVariables[0][0][0] == 0){
+        //     cout<<"0% or 50% done"<<endl;  
+        // }  
+        if(sumOfRecursiveCalls % 1000000000 == 0)
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
         if(sumOfRecursiveCalls > maxRecursions)
            return;
@@ -570,8 +793,17 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
     void optimize() {
         //j_size = 2;
         cout<< " j_size: " << j_size << " k_size: " << k_size<< " i_size: " <<i_size<<endl;
+        
         initializeCalculation();
         int startingSum = evaluateObjectiveFunction(problemVariables);
+        for(int s = 0; s<randomizedSolutions; s++) {
+            bool stop = false;
+            randomizedSolution(0,0,0,false,false,startingSum, stop, getRandomBoolean());
+      
+            //cout<<"finished "<< s+1 << "randomized guess" <<endl;
+            initializeCalculation();
+        }
+        cout<<"finished all randomized guesses" <<endl;
         auto start = std::chrono::steady_clock::now();
         rec(0,0,0,false,false,startingSum);
         auto end = std::chrono::steady_clock::now();
@@ -693,7 +925,7 @@ void print3DArray(int*** arr, int dim1, int dim2, int dim3) {
             t[i] = value;
         
     }
-    print1DArray(t,dim1);
+    //print1DArray(t,dim1);
     return nullptr;
 
 }

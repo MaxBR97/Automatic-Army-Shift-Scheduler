@@ -347,39 +347,40 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
         shuffleNames = configData.shuffleNames;
         numberOfIterations = configData.numberOfIterations;
         maxRecursions = configData.maxRecursionsPerIteration;
+        console.log("NUM OF ITER:", numberOfIterations);
         //minimumShiftRest = 
     }
     catch (_a) {
         console.log("error parsing config file");
     }
+    let bestMin = 9999999;
+    for (let iterations = 0; iterations < numberOfIterations; iterations++) {
+        parseInputFile().then(() => {
+            let optimizationProblem = {
+                objective: problem.objective,
+                constraints: problem.constraints,
+                dimensions: { j: problem.variables["z"].length, k: 2, i: nameToIndexMap.size }
+            };
+            //writeObjectToFile(optimizationProblem, outputFile);
+            addon.globalSetter(bestMin, "setMin");
+            addon.setMaxRecursions(maxRecursions, "setMaxRecursions");
+            const solution = prepareProblemDomainAndSolve();
+            let hold = addon.getResultObjectiveValue();
+            console.log("result value: ", hold);
+            if (hold < bestMin) {
+                bestMin = hold;
+                unparseSolution(solution);
+            }
+            // solveBinaryOptimizationProblem(optimizationProblem)
+            // .then((solution) => {
+            //     console.log('Optimization solution:', solution);
+            // })
+            // .catch((error) => {
+            //     console.error('Error:', error);
+            // });
+        });
+    }
 });
-let bestMin = 99999999;
-for (let iterations = 0; iterations < numberOfIterations; iterations++) {
-    parseInputFile().then(() => {
-        let optimizationProblem = {
-            objective: problem.objective,
-            constraints: problem.constraints,
-            dimensions: { j: problem.variables["z"].length, k: 2, i: nameToIndexMap.size }
-        };
-        //writeObjectToFile(optimizationProblem, outputFile);
-        addon.globalSetter(bestMin, "setMin");
-        addon.setMaxRecursions(maxRecursions, "setMaxRecursions");
-        const solution = prepareProblemDomainAndSolve();
-        let hold = addon.getResultObjectiveValue();
-        console.log("result value: ", hold);
-        if (hold < bestMin) {
-            bestMin = hold;
-            unparseSolution(solution);
-        }
-        // solveBinaryOptimizationProblem(optimizationProblem)
-        // .then((solution) => {
-        //     console.log('Optimization solution:', solution);
-        // })
-        // .catch((error) => {
-        //     console.error('Error:', error);
-        // });
-    });
-}
 function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));

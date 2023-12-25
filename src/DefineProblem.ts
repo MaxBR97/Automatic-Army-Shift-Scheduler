@@ -382,13 +382,13 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
             shuffleNames = configData.shuffleNames;
             numberOfIterations = configData.numberOfIterations;
             maxRecursions = configData.maxRecursionsPerIteration;
+            console.log("NUM OF ITER:", numberOfIterations)
             //minimumShiftRest = 
         } catch{
             console.log("error parsing config file")
         }
         
-    });
-let bestMin = 99999999;
+        let bestMin = 9999999;
 for(let iterations = 0; iterations < numberOfIterations; iterations ++){
 parseInputFile().then(() => {
     let optimizationProblem = {
@@ -408,6 +408,7 @@ parseInputFile().then(() => {
             bestMin = hold;
             unparseSolution(solution);
         }
+        
     
     // solveBinaryOptimizationProblem(optimizationProblem)
     // .then((solution) => {
@@ -418,7 +419,7 @@ parseInputFile().then(() => {
     // });
 });
 }
-
+});
 function shuffleArray(array: any) {
    for(var i = array.length - 1; i>0; i--) {
         var j = Math.floor(Math.random() * (i+1));
