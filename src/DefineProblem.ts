@@ -19,6 +19,8 @@ Date.prototype.toJSON = function (): string {
 
 let maxRecursions = 1000000000;
 let numberOfIterations = 1;
+let minShiftsBreak = 8;
+let randomizedRecursionsIterations = 0;
 let shuffleNames = true;
 let planUntil:Date = new Date();
 let planFrom:Date = new Date();
@@ -273,7 +275,7 @@ function prepareProblemDomainAndSolve() {
     let nightShifts = []
     let historyValues = []
     let shinGimelTimes = []
-    console.log("shifts: ",problem.variables["z"])
+    //console.log("shifts: ",problem.variables["z"])
     for(let j = 0; j<problem.variables["z"].length; j++) {
         if(problem.variables["z"][j].isNight)
             nightShifts[j] = true;
@@ -380,9 +382,13 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
         try {
             const configData = JSON.parse(data);
             shuffleNames = configData.shuffleNames;
-            numberOfIterations = configData.numberOfIterations;
+            numberOfIterations = configData.numberOfArrayShuffleIterations;
             maxRecursions = configData.maxRecursionsPerIteration;
-            console.log("NUM OF ITER:", numberOfIterations)
+            minShiftsBreak = configData.minShiftsBreak;
+            randomizedRecursionsIterations = configData.randomizedRecursionsIterations;
+            addon.setMaxRecursions(maxRecursions,"setMaxRecursions")
+            addon.setMinShiftsBreak(minShiftsBreak,"setMinShiftsBreak")
+            addon.setRandomizedRecursionsIterations(randomizedRecursionsIterations,"setRandomizedRecursionsIterations")
             //minimumShiftRest = 
         } catch{
             console.log("error parsing config file")
@@ -399,8 +405,8 @@ parseInputFile().then(() => {
     
     //writeObjectToFile(optimizationProblem, outputFile);
     addon.globalSetter(bestMin, "setMin");
-    addon.setMaxRecursions(maxRecursions,"setMaxRecursions")
-    const solution = prepareProblemDomainAndSolve();
+    console.log("------------------------------")
+    const solution = prepareProblemDomainAndSolve()
     let hold = addon.getResultObjectiveValue();
     console.log("result value: ",hold)
     if(hold < bestMin)
@@ -408,7 +414,7 @@ parseInputFile().then(() => {
             bestMin = hold;
             unparseSolution(solution);
         }
-        
+    console.log("------------------------------")
     
     // solveBinaryOptimizationProblem(optimizationProblem)
     // .then((solution) => {

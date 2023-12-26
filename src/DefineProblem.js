@@ -23,6 +23,8 @@ Date.prototype.toJSON = function () {
 };
 let maxRecursions = 1000000000;
 let numberOfIterations = 1;
+let minShiftsBreak = 8;
+let randomizedRecursionsIterations = 0;
 let shuffleNames = true;
 let planUntil = new Date();
 let planFrom = new Date();
@@ -256,7 +258,7 @@ function prepareProblemDomainAndSolve() {
     let nightShifts = [];
     let historyValues = [];
     let shinGimelTimes = [];
-    console.log("shifts: ", problem.variables["z"]);
+    //console.log("shifts: ",problem.variables["z"])
     for (let j = 0; j < problem.variables["z"].length; j++) {
         if (problem.variables["z"][j].isNight)
             nightShifts[j] = true;
@@ -345,9 +347,13 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
     try {
         const configData = JSON.parse(data);
         shuffleNames = configData.shuffleNames;
-        numberOfIterations = configData.numberOfIterations;
+        numberOfIterations = configData.numberOfArrayShuffleIterations;
         maxRecursions = configData.maxRecursionsPerIteration;
-        console.log("NUM OF ITER:", numberOfIterations);
+        minShiftsBreak = configData.minShiftsBreak;
+        randomizedRecursionsIterations = configData.randomizedRecursionsIterations;
+        addon.setMaxRecursions(maxRecursions, "setMaxRecursions");
+        addon.setMinShiftsBreak(minShiftsBreak, "setMinShiftsBreak");
+        addon.setRandomizedRecursionsIterations(randomizedRecursionsIterations, "setRandomizedRecursionsIterations");
         //minimumShiftRest = 
     }
     catch (_a) {
@@ -363,7 +369,7 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
             };
             //writeObjectToFile(optimizationProblem, outputFile);
             addon.globalSetter(bestMin, "setMin");
-            addon.setMaxRecursions(maxRecursions, "setMaxRecursions");
+            console.log("------------------------------");
             const solution = prepareProblemDomainAndSolve();
             let hold = addon.getResultObjectiveValue();
             console.log("result value: ", hold);
@@ -371,6 +377,7 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
                 bestMin = hold;
                 unparseSolution(solution);
             }
+            console.log("------------------------------");
             // solveBinaryOptimizationProblem(optimizationProblem)
             // .then((solution) => {
             //     console.log('Optimization solution:', solution);

@@ -33,8 +33,8 @@ namespace demo {
     long sumOfRecursiveCalls = 0;
     int countWhatever = 0;
     long maxRecursions = 100000000000;
-    int randomizedSolutions = 2000;
-    int minShiftsBreak = 10;
+    int randomizedSolutions = 100;
+    int minShiftsBreak = 8;
 
 
 int getRandomNumber() {
@@ -665,7 +665,7 @@ void initializeCalculation() {
         // if(problemVariables[0][0][0] == 0){
         //     cout<<"0% or 50% done"<<endl;  
         // }  
-        if(sumOfRecursiveCalls % 1000000000 == 0)
+        if(sumOfRecursiveCalls % 100000000 == 0)
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
         if(sumOfRecursiveCalls > maxRecursions)
            return;
@@ -1007,6 +1007,78 @@ void initializeCalculation() {
     napi_get_undefined(env, &result);
     return result;
 }
+
+    napi_value SetMinShiftsBreak(napi_env env, napi_callback_info info) {
+    // Get the number of arguments passed to the function
+    size_t argc = 2;
+    napi_value args[2];
+
+    // Parse the arguments
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // Check if two arguments are passed
+    if (argc != 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
+        return nullptr;
+    }
+
+    // Extract number from the first argument
+    int64_t num = 0;
+    napi_get_value_int64(env, args[0], &num);
+
+    // Extract string from the second argument
+    size_t strSize = 0;
+    napi_get_value_string_utf8(env, args[1], nullptr, 0, &strSize);
+    std::string str(strSize + 1, '\0');
+    napi_get_value_string_utf8(env, args[1], &str[0], strSize + 1, nullptr);
+
+    // Check if the string equals "abc" and set the number to the global variable x_var
+    if(str.compare("setMinShiftsBreak")) {
+        minShiftsBreak = static_cast<int>(num);
+    }
+
+    // Return undefined
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+    napi_value SetRandomizedRecursionsIterations(napi_env env, napi_callback_info info) {
+    // Get the number of arguments passed to the function
+    size_t argc = 2;
+    napi_value args[2];
+
+    // Parse the arguments
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    // Check if two arguments are passed
+    if (argc != 2) {
+        napi_throw_error(env, nullptr, "Expected 2 arguments");
+        return nullptr;
+    }
+
+    // Extract number from the first argument
+    int64_t num = 0;
+    napi_get_value_int64(env, args[0], &num);
+
+    // Extract string from the second argument
+    size_t strSize = 0;
+    napi_get_value_string_utf8(env, args[1], nullptr, 0, &strSize);
+    std::string str(strSize + 1, '\0');
+    napi_get_value_string_utf8(env, args[1], &str[0], strSize + 1, nullptr);
+
+    // Check if the string equals "abc" and set the number to the global variable x_var
+    if(str.compare("setRandomizedRecursionsIterations")) {
+        randomizedSolutions = static_cast<int>(num);
+    }
+
+    // Return undefined
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
+
 
     // recieves 2D array, and its 2 dimensions
     napi_value SetU(napi_env env, napi_callback_info info) {
@@ -1643,8 +1715,18 @@ void initializeCalculation() {
     napi_value Init(napi_env env, napi_value exports) {
         napi_status status;
 
-        napi_value spv, sns, sh, sst, ss, sm, st, sk, su, s,grov, gs,smr;
+        napi_value spv, sns, sh, sst, ss, sm, st, sk, su, s,grov, gs,smr , srri, smsb;
         status = napi_create_function(env, nullptr, 0, SetProblemVariables, nullptr, &spv);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+        status = napi_create_function(env, nullptr, 0, SetRandomizedRecursionsIterations, nullptr, &srri);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to create function");
+            return nullptr;
+        }
+        status = napi_create_function(env, nullptr, 0, SetMinShiftsBreak, nullptr, &smsb);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to create function");
             return nullptr;
@@ -1721,6 +1803,16 @@ void initializeCalculation() {
 
 
         status = napi_set_named_property(env, exports, "setProblemVariables", spv);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
+            return nullptr;
+        }
+        status = napi_set_named_property(env, exports, "setRandomizedRecursionsIterations", srri);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
+            return nullptr;
+        }
+        status = napi_set_named_property(env, exports, "setMinShiftsBreak", smsb);
         if (status != napi_ok) {
             napi_throw_error(env, nullptr, "Failed to set setProblemVariables as a property on exports");
             return nullptr;
