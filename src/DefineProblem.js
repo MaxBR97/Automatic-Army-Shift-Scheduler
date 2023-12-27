@@ -21,6 +21,7 @@ Date.prototype.toString = function () {
 Date.prototype.toJSON = function () {
     return this.toLocaleString();
 };
+let historyPatrolTime = 180;
 let maxRecursions = 1000000000;
 let numberOfIterations = 1;
 let minShiftsBreak = 8;
@@ -60,25 +61,64 @@ function parseInputFile() {
                 }
                 try {
                     const jsonData = JSON.parse(data);
+                    if (shuffleNames)
+                        shuffleArray(jsonData.soldiers);
+                    jsonData.soldiers.forEach((soldier, i) => {
+                        indexToNameMap.set(i, soldier.name);
+                        nameToIndexMap.set(soldier.name, i);
+                    });
                     planFrom = new Date(jsonData.planFrom);
                     planUntil = new Date(jsonData.planUntil);
                     patrolIntervals = jsonData.patrolIntervals;
+                    inferLastPatrolIntervalFromHistory(jsonData.history);
                     nightPatrolTime = {
                         from: stringToDateTimeParser(jsonData.nightPatrolTime.from),
                         until: stringToDateTimeParser(jsonData.nightPatrolTime.until)
                     };
                     problem.variables["z"] = quantizeTime(planFrom, planUntil, patrolIntervals);
+                    nameToIndexMap.forEach((val, key) => {
+                        historyEvaluationMap.set(val, { day: 0, night: 0 });
+                    });
+                    jsonData.history.solela.forEach((entry) => {
+                        entry.names.forEach((name) => {
+                            let index = nameToIndexMap.get(name);
+                            if (index >= 0) {
+                                let hold = historyEvaluationMap.get(index);
+                                let curDay = hold.day ? hold.day : 0;
+                                let curNight = hold.night ? hold.night : 0;
+                                isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
+                                adjustCommandingTimesAccordingToRestNeeded(stringToDateTimeParser(entry.time), index, jsonData);
+                            }
+                        });
+                    });
+                    jsonData.history.shinGimel.forEach((entry) => {
+                        entry.names.forEach((name) => {
+                            let index = nameToIndexMap.get(name);
+                            if (index >= 0) {
+                                let hold = historyEvaluationMap.get(index);
+                                let curDay = hold.day ? hold.day : 0;
+                                let curNight = hold.night ? hold.night : 0;
+                                isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
+                                adjustCommandingTimesAccordingToRestNeeded(stringToDateTimeParser(entry.time), index, jsonData);
+                            }
+                        });
+                    });
+                    // console.log("updated sodliers json: ")
+                    // for(let a = 0; a<jsonData.soldiers.length; a++) {
+                    //     console.log("soldier: ",jsonData.soldiers[a].name)
+                    //     console.log("commanding: ",jsonData.soldiers[a].commanderTimes)
+                    // }
                     //TODO: readyWithDawnTimes
                     readyWithDawnTime = stringToDateTimeParser(jsonData.readyWithDawnTime);
                     problem.coefficients["k"] = [];
                     problem.coefficients["m"] = [];
                     problem.coefficients["t"] = [];
                     problem.coefficients["s"] = [];
-                    if (shuffleNames)
-                        shuffleArray(jsonData.soldiers);
                     jsonData.soldiers.forEach((soldier, i) => {
-                        indexToNameMap.set(i, soldier.name);
-                        nameToIndexMap.set(soldier.name, i);
+                        if (i != nameToIndexMap.get(soldier.name))
+                            console.log("error 183");
+                        if (soldier.name != indexToNameMap.get(i))
+                            console.log("error 688");
                         problem.coefficients["k"][i] = [];
                         problem.coefficients["m"][i] = [];
                         problem.variables["z"].map((patrolTime, j) => {
@@ -109,31 +149,12 @@ function parseInputFile() {
                                 problem.coefficients["s"][i][as] = 0;
                         }
                     });
-                    nameToIndexMap.forEach((val, key) => {
-                        historyEvaluationMap.set(val, { day: 0, night: 0 });
-                    });
-                    jsonData.history.solela.forEach((entry) => {
-                        entry.names.forEach((name) => {
-                            let index = nameToIndexMap.get(name);
-                            if (index >= 0) {
-                                let hold = historyEvaluationMap.get(index);
-                                let curDay = hold.day ? hold.day : 0;
-                                let curNight = hold.night ? hold.night : 0;
-                                isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
-                            }
-                        });
-                    });
-                    jsonData.history.shinGimel.forEach((entry) => {
-                        entry.names.forEach((name) => {
-                            let index = nameToIndexMap.get(name);
-                            if (index >= 0) {
-                                let hold = historyEvaluationMap.get(index);
-                                let curDay = hold.day ? hold.day : 0;
-                                let curNight = hold.night ? hold.night : 0;
-                                isInTimeRange(nightPatrolTime.from, nightPatrolTime.until, stringToDateTimeParser(entry.time)) ? hold.night = (curNight + 1) : hold.day = (curDay + 1);
-                            }
-                        });
-                    });
+                    // console.log("updated matrix of k: ")
+                    // for(let i = 0; i<jsonData.soldiers.length; i++) {
+                    //     for(let j = 0; j< problem.variables["z"].length; j++) {
+                    //         console.log(`arr[${indexToNameMap.get(i)}][${j}] = ${problem.coefficients["k"][i][j]}`)
+                    //     }
+                    // }
                     if (!problem.constraints) {
                         problem.constraints = []; // Initialize constraints array if not already initialized
                     }
@@ -359,7 +380,7 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
     catch (_a) {
         console.log("error parsing config file");
     }
-    let bestMin = 9999999;
+    let bestMin = 99999999;
     for (let iterations = 0; iterations < numberOfIterations; iterations++) {
         parseInputFile().then(() => {
             let optimizationProblem = {
@@ -395,4 +416,48 @@ function shuffleArray(array) {
         array[i] = array[j];
         array[j] = temp;
     }
+}
+function inferLastPatrolIntervalFromHistory(history) {
+    let intervalSolela = 0, intervalShinGimel = 0;
+    if (history.solela.length >= 2)
+        intervalSolela = differenceInMinutes(stringToDateTimeParser(history.solela[history.solela.length - 2].time), stringToDateTimeParser(history.solela[history.solela.length - 1].time));
+    if (history.shinGimel.length >= 2)
+        intervalShinGimel = differenceInMinutes(stringToDateTimeParser(history.shinGimel[history.shinGimel.length - 2].time), stringToDateTimeParser(history.shinGimel[history.shinGimel.length - 1].time));
+    if (history.solela.length < 2 && history.shinGimel.length < 2)
+        return;
+    historyPatrolTime = Math.max(...[intervalSolela, intervalShinGimel]);
+    //console.log("history interval set: ", historyPatrolTime);
+}
+function differenceInMinutes(date1, date2) {
+    const diffInMilliseconds = Math.abs(date2 - date1);
+    const minutes = Math.floor(diffInMilliseconds / (1000 * 60));
+    return minutes;
+}
+function addMinutesToDate(date, minutesToAdd) {
+    const updatedDate = new Date(date.getTime() + minutesToAdd * 60000); // Converting minutes to milliseconds
+    return updatedDate;
+}
+function adjustCommandingTimesAccordingToRestNeeded(patrolDateTime, indexOfSoldier, jsonData) {
+    let restTimeUntilPlanFrom = differenceInMinutes(patrolDateTime, planFrom) - historyPatrolTime;
+    if (restTimeUntilPlanFrom < minShiftsBreak * patrolIntervals) {
+        let commandFrom = new Date(planFrom.getTime() - (60 * 1000)); //reduce one minute
+        let commandUntil = addMinutesToDate(planFrom, (minShiftsBreak * patrolIntervals) - restTimeUntilPlanFrom);
+        let commandingObject = { from: unparseDateToFormat1(commandFrom), until: unparseDateToFormat1(commandUntil) };
+        //console.log("soldier: ", indexToNameMap.get(indexOfSoldier), " commanding added: ", commandingObject);
+        jsonData.soldiers[indexOfSoldier].commanderTimes.push(commandingObject);
+        if (jsonData.soldiers[indexOfSoldier].name != indexToNameMap.get(indexOfSoldier))
+            console.log("ERROR 542");
+    }
+}
+function unparseDateToFormat1(date) {
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false // Using 24-hour format
+    };
+    return date.toLocaleDateString('en-US', options);
 }

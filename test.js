@@ -2,109 +2,109 @@
   "solela": [
     {
       "names": [
-        "Sheshar"
+        "Uzan"
       ],
       "time": "22/12/2023, 13:30:00"
     },
     {
       "names": [
-        "Yemilian"
+        "Reuven Priente"
       ],
       "time": "22/12/2023, 15:00:00"
     },
     {
       "names": [
-        "Uzan"
+        "Ben Hemo"
       ],
       "time": "22/12/2023, 16:30:00"
     },
     {
       "names": [
-        "Hanan"
+        "Nosatski"
       ],
       "time": "22/12/2023, 18:00:00"
     },
     {
       "names": [
-        "Raiffer"
+        "Yemilian"
       ],
       "time": "22/12/2023, 19:30:00"
     },
     {
       "names": [
-        "Kraiter",
-        "Vaknin"
+        "Ron Yoffe",
+        "Arik"
       ],
       "time": "22/12/2023, 21:00:00"
     },
     {
       "names": [
-        "Arik",
-        "Israel"
+        "Sheshar",
+        "Doron"
       ],
       "time": "22/12/2023, 22:30:00"
     },
     {
       "names": [
-        "Ben Hemo",
-        "Reuven Priente"
+        "Israel",
+        "Kraiter"
       ],
       "time": "23/12/2023, 00:00:00"
     },
     {
       "names": [
-        "Nahar",
+        "Yargan",
         "Fresburger"
       ],
       "time": "23/12/2023, 01:30:00"
     },
     {
       "names": [
-        "Doron",
-        "Ron Yoffe"
+        "Hen",
+        "Volitski"
       ],
       "time": "23/12/2023, 03:00:00"
     },
     {
       "names": [
-        "Avihai",
-        "Volitski"
+        "Reuven Priente",
+        "Uzan"
       ],
       "time": "23/12/2023, 04:30:00"
     },
     {
       "names": [
-        "Amira"
+        "Hanan"
       ],
       "time": "23/12/2023, 06:00:00"
     },
     {
       "names": [
-        "Zaslevsky"
+        "Ben Hemo"
       ],
       "time": "23/12/2023, 07:30:00"
     },
     {
       "names": [
-        "Sheshar"
+        "Nosatski"
       ],
       "time": "23/12/2023, 09:00:00"
     },
     {
       "names": [
-        "Sofer"
+        "Zaslevsky"
       ],
       "time": "23/12/2023, 10:30:00"
     },
     {
       "names": [
-        "Daniel Vaille"
+        "Vaknin"
       ],
       "time": "23/12/2023, 12:00:00"
     },
     {
       "names": [
-        "Vaknin"
+        "Sheshar"
       ],
       "time": "23/12/2023, 13:30:00"
     }

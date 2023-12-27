@@ -30,11 +30,14 @@ namespace demo {
     int** accumulationForObjectiveFunction = nullptr;
     int* accumulationForSolela = nullptr;
     int* accumulationForShinGimel = nullptr;
+    int* doesPatrol = nullptr;
     long sumOfRecursiveCalls = 0;
     int countWhatever = 0;
     long maxRecursions = 100000000000;
     int randomizedSolutions = 100;
     int minShiftsBreak = 8;
+    int objectiveFunctionConfig = 1;
+    int infinityValue = 1;
 
 
 int getRandomNumber() {
@@ -107,6 +110,7 @@ void delete3DArray(int ***arr, int dim1, int dim2, int dim3) {
 
 
 void initializeCalculation() {
+    infinityValue = (j_size+1) * (j_size+1) * (j_size + 1);
     sumOfRecursiveCalls = 0;
     //delete3DArray(currentBestAnswer,j_size,k_size,i_size);
     delete3DArray(problemVariables, j_size, k_size, i_size);
@@ -153,6 +157,12 @@ void initializeCalculation() {
         accumulationForShinGimel[j] = 0;
     }
 
+    if(doesPatrol == nullptr) 
+        doesPatrol = new int[i_size];
+    for(int i=0; i<i_size; i++) {
+        doesPatrol[i] = 0;
+    }
+
     init = true;
     if(problemVariables == nullptr)
         init = true;
@@ -177,7 +187,7 @@ void initializeCalculation() {
         return nightShifts[j];
     }
 
-    int calculateDifferenceInObjectiveFunction(int j, int k, int i) {
+    int calculateDifferenceInObjectiveFunction1(int j, int k, int i) {
         if(problemVariables[j][k][i] == 1){
             int curVal = 0;
             int updatedVal = 0;
@@ -197,7 +207,7 @@ void initializeCalculation() {
         return 0;
     }
 
-    int evaluateObjectiveFunction(int*** arr) {
+    int evaluateObjectiveFunction1(int*** arr) {
         //print3DArray(problemVariables,j_size,k_size,i_size);
         int sum = 0;
         for (int i = 0; i < i_size; ++i) {
@@ -231,8 +241,9 @@ void initializeCalculation() {
             int updatedVal = 0;
             int hold = 0;
             int spaceFromLastPatrol = 0;
+            
+            bool flag = false;
             for(int dim1 = j-1; dim1>=0; dim1 --) {
-                bool flag = false;
                 for(int dim2 = 0; dim2<k_size; dim2++) {
                     if(problemVariables[dim1][dim2][i] == 1) {
                         spaceFromLastPatrol = j-dim1;
@@ -240,8 +251,14 @@ void initializeCalculation() {
                         break;
                     }
                 }
-                if(flag)
-                    break;
+                if(flag){
+                    if(doesPatrol[i] <= 0)
+                        cout<<"ERROR (doesPatrol)"<<endl;
+                    break; 
+                }
+            }
+            if(!flag) {
+                spaceFromLastPatrol = j + 1;
             }
             if(isNight(j)) {
                 hold = accumulationForObjectiveFunction[i][1];
@@ -250,22 +267,30 @@ void initializeCalculation() {
             }
             else {
                 hold = accumulationForObjectiveFunction[i][0];
-                curVal = hold * hold;
-                updatedVal = (hold + 1) * (hold + 1) ;
+                curVal = hold * hold * hold;
+                updatedVal = (hold + 1) * (hold + 1) * (hold + 1) ;
             }
-            updatedVal += spaceFromLastPatrol * spaceFromLastPatrol * spaceFromLastPatrol;
+
+            updatedVal += spaceFromLastPatrol * spaceFromLastPatrol;
+             if(doesPatrol[i] <= 0){
+                if(doesPatrol[i] < 0)
+                    cout<<"ERROR, doesPatrol is negative"<<endl;
+                updatedVal -= infinityValue;
+            }
+
             return (updatedVal - curVal);
         }
+        cout<<"ERROR"<<endl;
         return 0;
     }
 
     int evaluateObjectiveFunction2(int*** arr) {
-        //print3DArray(problemVariables,j_size,k_size,i_size);
         int sum = 0;
         for (int i = 0; i < i_size; ++i) {
             int day = 0;
             int night = 0;
             int spaceFromLastPatrolSum = 0;
+            bool patrolsAtleastOnce = false;
             for (int j = 0; j < j_size; ++j) {
                 if(isNight(j)){
                     for (int k = 0; k < k_size; ++k) {
@@ -277,30 +302,55 @@ void initializeCalculation() {
                         day+= arr[j][k][i];
                     }
                 }
+
                 if(arr[j][0][i] == 1 || arr[j][1][i] == 1) {
-                    for(int dim1 = j-1; dim1>=0; dim1 --) {
-                        bool flag = false;
+                    patrolsAtleastOnce = true;
+                    bool flag = false;
+                    for(int dim1 = j-1; dim1>=0; --dim1) {
+                       // flag = false;
                         for(int dim2 = 0; dim2<k_size; dim2++) {
-                            if(problemVariables[dim1][dim2][i] == 1) {
-                                spaceFromLastPatrolSum += (j-dim1) * (j-dim1) * (j-dim1);
+                            if(arr[dim1][dim2][i] == 1) {
                                 flag = true;
-                                break;
+                                spaceFromLastPatrolSum += (j-dim1) * (j-dim1);
+                                dim2 = k_size; //break
+                                dim1 = -1;
                             }
                         }
-                        if(flag)
-                            break;
+                    }
+                    if(!flag) {
+                        spaceFromLastPatrolSum = (j+1) * (j+1);
                     }
                 }
             }
+            if(!patrolsAtleastOnce){
+                spaceFromLastPatrolSum = infinityValue; 
+            }
             day += historyValues[i][0];
             night += historyValues[i][1];
-            day = day*day;
+            day = day*day*day;
             night = night*night*night*night;
             int soldierSum = day + night + spaceFromLastPatrolSum;
             sum = sum + soldierSum;
         }
         return sum;
 }
+    int calculateDifferenceInObjectiveFunction(int j, int k, int i) {
+        if(objectiveFunctionConfig == 1)
+            return calculateDifferenceInObjectiveFunction1(j,k,i);
+        else if(objectiveFunctionConfig == 2)
+            return calculateDifferenceInObjectiveFunction2(j,k,i);
+        cout<<"ERROR (calculateDifference)"<<endl;
+        return 0;
+    }
+
+    int evaluateObjectiveFunction(int*** arr) {
+        if(objectiveFunctionConfig == 1)
+            return evaluateObjectiveFunction1(arr);
+        else if(objectiveFunctionConfig == 2)
+            return evaluateObjectiveFunction2(arr);
+        cout<<"ERROR (evaluateObjectiveFunction)"<<endl;
+        return 0;
+    }
     // deep copy all values of 'toCopy' array to 'subject' array. Assume they are same dimensions.
     void deepCopyArr(int ***toCopy, int ***subject, int dim1, int dim2, int dim3) {
         for (int i = 0; i < dim1; ++i) {
@@ -459,13 +509,18 @@ void initializeCalculation() {
                 accumulationForSolela[j] += 1;
             else if(k==1)
                 accumulationForShinGimel[j] +=1;
+            
+            doesPatrol[i] ++;
         }
-        if(x == -1) {
+        else if(x == -1) {
             if(k==0)
                 accumulationForSolela[j] -= 1;
             else if(k==1)
                 accumulationForShinGimel[j] -=1;
+
+            doesPatrol[i] --;
         }
+        
     }
     
     void updatePatrolersAccumulation(int j, int k, int i, int x) {
@@ -530,7 +585,7 @@ void initializeCalculation() {
         int diff = 0;
         if(!cont) {
             diff = calculateDifferenceInObjectiveFunction(j,k,i);
-            if(!(acc + diff < currentMinValue)){
+            if(objectiveFunctionConfig != 2 && !(acc + diff < currentMinValue)){
                 //countWhatever++;
                 problemVariables[j][k][i] = 0;
                 cont = true;
@@ -552,12 +607,12 @@ void initializeCalculation() {
         }
 
         //reached a statisfiable configuration, check for optimality
-        if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1 ) {
+        if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1) {
             int curVal = evaluateObjectiveFunction(problemVariables);
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
             cout<<"option's value: "<<curVal <<" and in the accumulative style it is: " << acc + calculateDifferenceInObjectiveFunction(j,k,i) <<endl;
             if(curVal != acc + calculateDifferenceInObjectiveFunction(j,k,i))
-                cout << "ERROR" <<endl;
+                cout << "ERROR randomizedSolution" <<endl;
             //optimal
             if(curVal < currentMinValue){
                 //cout <<"s" <<endl;
@@ -667,8 +722,9 @@ void initializeCalculation() {
         // }  
         if(sumOfRecursiveCalls % 100000000 == 0)
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
-        if(sumOfRecursiveCalls > maxRecursions)
+        if(sumOfRecursiveCalls > maxRecursions){
            return;
+        }
         sumOfRecursiveCalls ++;
         //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
         //print3DArray(problemVariables,j_size,k_size,i_size);
@@ -709,7 +765,7 @@ void initializeCalculation() {
         int diff = 0;
         if(!cont) {
             diff = calculateDifferenceInObjectiveFunction(j,k,i);
-            if(!(acc + diff < currentMinValue)){
+            if(objectiveFunctionConfig != 2 && !(acc + diff < currentMinValue)){
                 //countWhatever++;
                 problemVariables[j][k][i] = 0;
                 cont = true;
@@ -731,12 +787,12 @@ void initializeCalculation() {
         }
 
         //reached a statisfiable configuration, check for optimality
-        if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1 ) {
+        if(!cont && solela && shinGimel && problemVariables[j][k][i] == 1) {
             int curVal = evaluateObjectiveFunction(problemVariables);
             cout<<"recursive calls: "<<sumOfRecursiveCalls <<endl;
-            cout<<"option's value: "<<curVal <<" which is equivalent to: " << evaluateObjectiveFunction(problemVariables) <<endl;
+            cout<<"option's value: "<<curVal <<" which is equivalent to: " << acc + calculateDifferenceInObjectiveFunction(j,k,i) <<endl;
             if(curVal != acc + calculateDifferenceInObjectiveFunction(j,k,i))
-                cout << "ERROR" <<endl;
+                cout << "ERROR rec" <<endl;
             //optimal
             if(curVal < currentMinValue){
                 //cout <<"s" <<endl;
@@ -755,7 +811,9 @@ void initializeCalculation() {
                 if(k+1==k_size){
                     if(j+1==j_size){
                         //cout<<"reached the end"<<endl;
+                        
                         problemVariables[j][k][i] = 0;
+                        //print3DArray(problemVariables,j_size,k_size,i_size);
                         return;
                     }
                     else {
@@ -787,6 +845,7 @@ void initializeCalculation() {
                     problemVariables[j][k][i] = 0;
                     rec(j,k,i+1,solela,shinGimel,acc); 
             }
+            problemVariables[j][k][i] = 0;
             return;
     }
 
