@@ -583,7 +583,7 @@ void initializeCalculation() {
         sumOfRecursiveCalls ++;
         //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
         //print3DArray(problemVariables,j_size,k_size,i_size);
-        if(stop || sumOfRecursiveCalls > (j_size * k_size * i_size * 100) ){
+        if(stop || sumOfRecursiveCalls > (j_size * k_size * i_size * 1000) ){
             return;
         }
     
