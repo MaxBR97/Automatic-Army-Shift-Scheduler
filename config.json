@@ -1,7 +1,7 @@
 {
     "shuffleNames" : true,
-    "numberOfArrayShuffleIterations" : 50,
-    "maxRecursionsPerIteration" : 100000000,
-    "minShiftsBreak": 6,
-    "randomizedRecursionsIterations" : 100
+    "numberOfArrayShuffleIterations" : 9999,
+    "maxRecursionsPerIteration" : 700000,
+    "minShiftsBreak": 4,
+    "randomizedRecursionsIterations" : 10000
 }

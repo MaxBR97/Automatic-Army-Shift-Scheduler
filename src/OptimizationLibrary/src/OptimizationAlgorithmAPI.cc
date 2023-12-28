@@ -5,6 +5,8 @@
 #include <cstring>
 #include <chrono>
 #include <random>
+#include <stack>
+#include <algorithm>
 
 //int*** problemVariables = nullptr; // Declare the global variable
 namespace demo {
@@ -33,6 +35,7 @@ namespace demo {
     int* doesPatrol = nullptr;
     long sumOfRecursiveCalls = 0;
     int countWhatever = 0;
+    std::stack<int> soldiersIndexes;
     long maxRecursions = 100000000000;
     int randomizedSolutions = 100;
     int minShiftsBreak = 8;
@@ -40,7 +43,43 @@ namespace demo {
     int infinityValue = 1;
 
 
+
+void pushRandomNumbers(std::stack<int>& stk, int k) {
+
+        std::vector<int> numbers;
+        // Fill the vector with numbers from 0 to k-1
+        for (int i = 0; i < k; ++i) {
+            numbers.push_back(i);
+        }
+
+        // Shuffle the vector to get numbers in a random order
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(numbers.begin(), numbers.end(), g);
+
+        // Push the shuffled numbers into the stack
+        for (int num : numbers) {
+            stk.push(num);
+        }
+    
+}
+
+int topAndPop(std::stack<int>& stk) {
+    //cout<<"some"<<endl;
+    int hold = stk.top();
+    stk.pop();
+    //cout<<"thing"<<endl;
+    return hold;
+}
+
+void clearStack(std::stack<int>& s) {
+    while (!s.empty()) {
+        s.pop();
+    }
+}
+
 int getRandomNumber() {
+    return 1;
     // Seed the random number generator
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -194,7 +233,7 @@ void initializeCalculation() {
             int hold = 0;
             if(isNight(j)) {
                 hold = accumulationForObjectiveFunction[i][1];
-                curVal = hold * hold * hold;
+                curVal = hold * hold * hold ;
                 updatedVal = (hold + 1) * (hold + 1) * (hold + 1);
             }
             else {
@@ -463,6 +502,7 @@ void initializeCalculation() {
         }
         return true;
     }
+    
 
     bool soldiersFromDifferentCrewsInShinGimel(int j, int k, int i) {
         if(k == 1 && problemVariables[j][1][i] == 1){
@@ -539,49 +579,61 @@ void initializeCalculation() {
     }
 
     void randomizedSolution(int j, int k, int i,bool solela, bool shinGimel, int acc, bool &stop, bool skipFirst) {  
+        //cout<<""<<endl;
         sumOfRecursiveCalls ++;
         //cout << " j: " << j << " k: " << k << " i: " << i <<endl;
         //print3DArray(problemVariables,j_size,k_size,i_size);
-        if(stop || sumOfRecursiveCalls > 10000 ){
+        if(stop || sumOfRecursiveCalls > (j_size * k_size * i_size * 100) ){
             return;
         }
     
         problemVariables[j][k][i] = 1;
 
         bool cont = false;
-        if(skipFirst)
+        if(skipFirst) {
             cont = true;
+        }
+        //cout<<"0"<<endl;
         if(!cont && !notTooManySolelaPatrolers(j,k,i)) {
             problemVariables[j][k][i] = 0;
-            i = i_size - 1;
+            //cout<<"55"<<endl;
+            clearStack(soldiersIndexes);
+            //cout<<"22"<<endl;
             cont = true;
         }
         if(!cont && !notTooManyShinGimelPatrolers(j,k,i)) {
             problemVariables[j][k][i] = 0;
-            i = i_size - 1;
+            //cout<<"177"<<endl;
+            clearStack(soldiersIndexes);
+            //cout<<"1423"<<endl;
             cont = true;
         }
-        
+        //cout<<"1"<<endl;
         if(!cont && !soldierDoesntPatrolAtDifferentPlacesSameTime(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        //cout<<"2"<<endl;
         if(!cont && !minBreakToSoldier(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        //cout<<"3"<<endl;
         if(!cont && !checkCommanderDoesntPatrol(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        //cout<<"4"<<endl;
         if(!cont && !soldierIsPresentIfPatrols(j,k,i)) {
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        //cout<<"5"<<endl;
         if(!cont && !soldiersFromDifferentCrewsInShinGimel(j,k,i)){
             problemVariables[j][k][i] = 0;
             cont = true;
         }
+        //cout<<"6"<<endl;
         int diff = 0;
         if(!cont) {
             diff = calculateDifferenceInObjectiveFunction(j,k,i);
@@ -592,7 +644,7 @@ void initializeCalculation() {
                // cout<<"didnt pass number: " << countWhatever << "value was: " << acc+diff << "while minimum is: "<<currentMinValue << "iteration : "<<sumOfRecursiveCalls<< endl;
             }
         }
-    
+        //cout<<"7"<<endl;
         
         if(solela == false && !cont){
            // cout <<"a" <<endl;
@@ -621,17 +673,22 @@ void initializeCalculation() {
             }
             //cout <<"aa" <<endl;
             problemVariables[j][k][i] = 0;
-            stop = true;
+            //stop = true;
             return;
         }
 
         //recursive step
         solela = false;
         shinGimel = false;
-        if(i+1==i_size){
+        if(soldiersIndexes.empty()){
+            //cout<<"2222"<<endl;
+                pushRandomNumbers(soldiersIndexes, i_size);
+                //cout<<"32"<<endl;
+                int nextIndex = topAndPop(soldiersIndexes);
                 if(k+1==k_size){
                     if(j+1==j_size){
                         //cout<<"reached the end"<<endl;
+                        clearStack(soldiersIndexes);
                         problemVariables[j][k][i] = 0;
                         return;
                     }
@@ -641,23 +698,23 @@ void initializeCalculation() {
                             if(rnd == 1){
                                 problemVariables[j][k][i] = 1;
                                 updateAccumulation(j,k,i,1);
-                                randomizedSolution(j+1,0,0,solela,shinGimel,acc + diff,stop, false);
+                                randomizedSolution(j+1,0,nextIndex,solela,shinGimel,acc + diff,stop, false);
                                 updateAccumulation(j,k,i,-1);
                                 problemVariables[j][k][i] = 0;
-                                randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop,false);
+                                randomizedSolution(j+1,0,nextIndex,solela,shinGimel,acc,stop,false);
                             }
                             else {
                                 problemVariables[j][k][i] = 0;
-                                randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop,false);
+                                randomizedSolution(j+1,0,nextIndex,solela,shinGimel,acc,stop,false);
                                 problemVariables[j][k][i] = 1;
                                 updateAccumulation(j,k,i,1);
-                                randomizedSolution(j+1,0,0,solela,shinGimel,acc + diff,stop, false);
+                                randomizedSolution(j+1,0,nextIndex,solela,shinGimel,acc + diff,stop, false);
                                 updateAccumulation(j,k,i,-1);
                             }
                         }
                         else {
                             problemVariables[j][k][i] = 0;
-                            randomizedSolution(j+1,0,0,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
+                            randomizedSolution(j+1,0,nextIndex,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
                         }
                     }
                 }
@@ -667,48 +724,50 @@ void initializeCalculation() {
                             if(rnd == 1){
                                 problemVariables[j][k][i] = 1;
                                 updateAccumulation(j,k,i,1);
-                                randomizedSolution(j,k+1,0,solela,shinGimel,acc + diff,stop, false);
+                                randomizedSolution(j,k+1,nextIndex,solela,shinGimel,acc + diff,stop, false);
                                 updateAccumulation(j,k,i,-1);
                                 problemVariables[j][k][i] = 0;
-                                randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop, false);
+                                randomizedSolution(j,k+1,nextIndex,solela,shinGimel,acc,stop, false);
                             }
                             else {
                                 problemVariables[j][k][i] = 0;
-                                randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop,false);
+                                randomizedSolution(j,k+1,nextIndex,solela,shinGimel,acc,stop,false);
                                 problemVariables[j][k][i] = 1;
                                 updateAccumulation(j,k,i,1);
-                                randomizedSolution(j,k+1,0,solela,shinGimel,acc + diff,stop, false);
+                                randomizedSolution(j,k+1,nextIndex,solela,shinGimel,acc + diff,stop, false);
                                 updateAccumulation(j,k,i,-1);
                             }
                         }
                         else {
                             problemVariables[j][k][i] = 0;
-                            randomizedSolution(j,k+1,0,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
+                            randomizedSolution(j,k+1,nextIndex,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean());
                         }
                 }
             }
             else {
+                //cout<<"1"<<endl;
+                int nextIndex = topAndPop(soldiersIndexes);
                     if(!cont){
                         int rnd = getRandomNumber();
                         if(rnd == 1){
                             problemVariables[j][k][i] = 1;
                             updateAccumulation(j,k,i,1);
-                            randomizedSolution(j,k,i+1,solela,shinGimel,acc + diff,stop,false);
+                            randomizedSolution(j,k,nextIndex,solela,shinGimel,acc + diff,stop,false);
                             updateAccumulation(j,k,i,-1);
                             problemVariables[j][k][i] = 0;
-                            randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop,false);
+                            randomizedSolution(j,k,nextIndex,solela,shinGimel,acc,stop,false);
                         }
                         else {
                             problemVariables[j][k][i] = 0;
-                            randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop,false);
+                            randomizedSolution(j,k,nextIndex,solela,shinGimel,acc,stop,false);
                             problemVariables[j][k][i] = 1;
                             updateAccumulation(j,k,i,1);
-                            randomizedSolution(j,k,i+1,solela,shinGimel,acc + diff,stop,false);
+                            randomizedSolution(j,k,nextIndex,solela,shinGimel,acc + diff,stop,false);
                             updateAccumulation(j,k,i,-1);
                         }
                     }  else {
                         problemVariables[j][k][i] = 0;
-                        randomizedSolution(j,k,i+1,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean()); 
+                        randomizedSolution(j,k,nextIndex,solela,shinGimel,acc,stop, skipFirst && getRandomBoolean()); 
                     }
             }
             problemVariables[j][k][i] = 0;
@@ -857,8 +916,9 @@ void initializeCalculation() {
         int startingSum = evaluateObjectiveFunction(problemVariables);
         for(int s = 0; s<randomizedSolutions; s++) {
             bool stop = false;
-            randomizedSolution(0,0,0,false,false,startingSum, stop, getRandomBoolean());
-      
+            pushRandomNumbers(soldiersIndexes,i_size);
+            randomizedSolution(0,0,topAndPop(soldiersIndexes),false,false,startingSum, stop, getRandomBoolean());
+            clearStack(soldiersIndexes);
             //cout<<"finished "<< s+1 << "randomized guess" <<endl;
             initializeCalculation();
         }

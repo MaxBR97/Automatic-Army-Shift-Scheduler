@@ -17,6 +17,8 @@ Date.prototype.toJSON = function (): string {
     return this.toLocaleString();
 };
 
+let MTPatrolsNight = false;
+let MedicPatrolsNight = false;
 let historyPatrolTime = 180;
 let maxRecursions = 1000000000;
 let numberOfIterations = 1;
@@ -148,10 +150,18 @@ async function parseInputFile(): Promise<void>  {
                 problem.coefficients["s"][i] = []
                 for (let as = 0; as < problem.variables["z"].length; as ++) {
                     
-                    if(soldier.isMT || soldier.isMedic)
+                    if(soldier.isMT || soldier.isMedic) {
                         problem.coefficients["s"][i][as] = 1;
-                    else
-                    problem.coefficients["s"][i][as] = 0;
+                        if(soldier.isMT && !MTPatrolsNight) {
+                            historyEvaluationMap.get(i).night += 7;
+                        }
+                        else if(soldier.isMedic && !MedicPatrolsNight) {
+                            historyEvaluationMap.get(i).night += 7;
+                        }
+                    }
+                    else {
+                        problem.coefficients["s"][i][as] = 0;
+                    }
                 }
             
             });
@@ -416,7 +426,7 @@ fs.readFile(configurationFile, 'utf8', (err, data) => {
             console.log("error parsing config file")
         }
         
-        let bestMin = 99999999;
+        let bestMin = 2147000000;
 for(let iterations = 0; iterations < numberOfIterations; iterations ++){
 parseInputFile().then(() => {
     let optimizationProblem = {
@@ -467,8 +477,8 @@ function inferLastPatrolIntervalFromHistory(history: any) {
         intervalShinGimel = differenceInMinutes(stringToDateTimeParser(history.shinGimel[history.shinGimel.length-2].time) , stringToDateTimeParser(history.shinGimel[history.shinGimel.length-1].time));
     if(history.solela.length < 2 && history.shinGimel.length < 2)
         return;
-    historyPatrolTime =  Math.max(...[intervalSolela,intervalShinGimel]);
-    //console.log("history interval set: ", historyPatrolTime);
+    historyPatrolTime =  Math.min(...[intervalSolela,intervalShinGimel]);
+    console.log("history interval set: ", historyPatrolTime);
 }
 
 function differenceInMinutes(date1, date2) {

@@ -1,51 +1,55 @@
 {
-    "planFrom" : "December 22, 2023 13:30:00",
-    "planUntil": "December 23, 2023 15:00:00",
+    "planFrom" : "December 27, 2023 19:30:00",
+    "planUntil": "December 29, 2023 09:00:00",
     "patrolIntervals": 90,
     "nightPatrolTime":{
-                        "from": "21:00:00",
+                        "from": "22:30:00",
                         "until" :"06:00:00"
                     },
     "shinGimelTimes": [
-            {
-                "from": "December 15, 2023 00:00:00",
-                "until": "December 15, 2023 18:00:00"
-            }
         ],
     "readyWithDawnTime" : "05:30:00",
     "soldiers" : 
         [
             { 
-                "name":"Hen",
-                "commanderTimes": [
+                "name":"Dennis Kovshenchikov",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }
                 ],
                 "isMT":false, 
                 "isMedic":false, 
-                "crew":"1b", 
+                "crew":"mapik", 
                 "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "December 31, 2023 10:00:00"
-                                }
-                            ]
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "January 20, 2024 10:00:00"
+                }
+                ]
             },
             { 
-                "name":"Israel",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":true, 
-                "crew":"9", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Arik",
-                "commanderTimes": [],
+                "name":"Ran Zinger",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
                 "isMT":false, 
                 "isMedic":false, 
-                "crew":"9", 
+                "crew":"mapik", 
+                "presentDates":[{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "January 20, 2024 10:00:00"
+                }]
+            },
+            {
+                "name":"Maya Ghezi",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"mapik", 
                 "presentDates":[{
                                     "from": "December 13, 2023 13:00:00",
                                     "until": "January 20, 2024 10:00:00"
@@ -53,8 +57,27 @@
                             ]
             },
             { 
-                "name":"Reuven Priente",
-                "commanderTimes": [],
+                "name":"Shahar Pinhasi",
+                "commanderTimes": [{
+                    "from": "December 27, 2023 22:30:00",
+                    "until": "December 28, 2023 07:30:00"
+                },
+                {
+                    "from": "December 28, 2023 22:30:00",
+                    "until": "December 29, 2023 07:30:00"
+                }],
+                "isMT":true, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Binyamin Hazoom",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
                 "isMT":true, 
                 "isMedic":false, 
                 "crew":"mapik", 
@@ -65,15 +88,305 @@
                             ]
             },
             { 
-                "name":"Volitski",
-                "commanderTimes": [],
-                "isMT":false, 
+                "name":"Ido Shmilovits",
+                "commanderTimes": [{
+                    "from": "December 27, 2023 22:30:00",
+                    "until": "December 28, 2023 07:30:00"
+                },
+                {
+                    "from": "December 28, 2023 22:30:00",
+                    "until": "December 29, 2023 07:30:00"
+                }
+            ],
+                "isMT":true, 
                 "isMedic":false, 
-                "crew":"1b", 
+                "crew":"mapik", 
                 "presentDates":[{
                                     "from": "December 13, 2023 13:00:00",
                                     "until": "January 20, 2024 10:00:00"
                                 }
+                            ]
+            },
+            { 
+                "name":"Reuven Prientte",
+                "commanderTimes": [],
+                "isMT":true, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Martin Klimentiano",
+                "commanderTimes": [],
+                "isMT":true, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[
+                            ]
+            },
+
+
+            { 
+                "name":"Yotam Eliya",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Tal Zikri",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ido Navon",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Maor Sheli",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Eytam Goelman",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Hilel Shahor",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Eliezer Koplovich",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yuri Koifman",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Max Brener",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ariel Ezra",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Rotem Melamed",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Daniel Cohen Tov",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+
+
+            { 
+                "name":"Rei Vazan",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Eliyahu Kraiter",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Itamar Ben Ami",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yair Ben Hemo",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Oded Peretz",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yair Volitski",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Oz Amira",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Daniel Vaille",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Hen Dahan",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Avihay Cohen",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1b", 
+                "presentDates":[
+                            ]
+            },
+
+
+            { 
+                "name":"Arsen Rogovoy",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Doron Shai",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                    "from": "December 28, 2023 13:00:00",
+                    "until": "January 20, 2024 10:00:00"
+                }
                             ]
             },
             { 
@@ -89,43 +402,7 @@
                             ]
             },
             { 
-                "name":"Avihai",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"1b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Ben Hemo",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"1b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Raiffer",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Nosatski",
+                "name":"Adir Uzan",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
@@ -137,7 +414,7 @@
                             ]
             },
             { 
-                "name":"Yemilian",
+                "name":"Yemilian Solnetsov",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
@@ -149,91 +426,7 @@
                             ]
             },
             { 
-                "name":"Hanan",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Zaslevsky",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Sheshar",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Vaknin",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Amira",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"1b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Sofer",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"2b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Daniel Vaille",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"1b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Uzan",
+                "name":"Itay Hefets",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
@@ -245,19 +438,7 @@
                             ]
             },
             { 
-                "name":"Kraiter",
-                "commanderTimes": [],
-                "isMT":false, 
-                "isMedic":false, 
-                "crew":"1b", 
-                "presentDates":[{
-                                    "from": "December 13, 2023 13:00:00",
-                                    "until": "January 20, 2024 10:00:00"
-                                }
-                            ]
-            },
-            { 
-                "name":"Doron",
+                "name":"Nir Shlomovits",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
@@ -269,7 +450,7 @@
                             ]
             },
             { 
-                "name":"Nahar",
+                "name":"Shalev Ben Moshe",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
@@ -281,11 +462,298 @@
                             ]
             },
             { 
-                "name":"Yargan",
+                "name":"Shay Nosatski",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 28, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Roee Fresburger",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Nahar Cohen",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"1c", 
+                "presentDates":[
+                            ]
+            },
+
+
+            { 
+                "name":"Dror Zaltsman",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Nadav Dekel",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Ishambel Senbato",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                    "from": "December 28, 2023 13:00:00",
+                    "until": "January 20, 2024 10:00:00"
+                }
+                            ]
+            },
+            { 
+                "name":"Idan Hason",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Eliyahu Priev",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                    "from": "December 28, 2023 13:00:00",
+                    "until": "January 20, 2024 10:00:00"
+                }
+                            ]
+            },
+            { 
+                "name":"Yarden Tsefler",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Tal Amram",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Amitay Franko",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Or Dadon",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Omri Nagar",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 28, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Yonatan Brog",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2a", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+
+
+            { 
+                "name":"Ariel Siboni",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yonatan Tsemah",
                 "commanderTimes": [],
                 "isMT":false, 
                 "isMedic":false, 
                 "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Moshe Yargan",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yair Sheshar",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yair Vaknin",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Ohad Kabareti",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Ronen Meri",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Eitan Raiffer",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Idan Zaslevski",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Omri Soffer",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"2b", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Ofer Prientte",
+                "commanderTimes": [{
+                    "from": "December 13, 2023 13:00:00",
+                    "until": "December 31, 2025 10:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"mapik", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+
+
+            { 
+                "name":"Guy Peleg",
+                "commanderTimes": [
+                    {
+                        "from":"January 20, 2023 10:00:00",
+                        "until":"December 13, 2025 13:00:00"
+                    }
+                ],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
                 "presentDates":[{
                                     "from": "December 13, 2023 13:00:00",
                                     "until": "January 20, 2024 10:00:00"
@@ -293,14 +761,126 @@
                             ]
             },
             { 
-                "name":"Fresburger",
-                "commanderTimes": [],
+                "name":"Moshe Boyem",
+                "commanderTimes": [{
+                    "from":"January 20, 2023 10:00:00",
+                    "until":"December 13, 2025 13:00:00"
+                }],
                 "isMT":false, 
                 "isMedic":false, 
-                "crew":"1c", 
+                "crew":"9", 
                 "presentDates":[{
                                     "from": "December 13, 2023 13:00:00",
                                     "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Refael Marawani",
+                "commanderTimes": [{
+                    "from":"January 20, 2023 10:00:00",
+                    "until":"December 13, 2025 13:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Erel Manor",
+                "commanderTimes": [ {
+                    "from": "December 27, 2023 22:30:00",
+                    "until": "December 28, 2023 07:30:00"
+                },
+                {
+                    "from": "December 28, 2023 22:30:00",
+                    "until": "December 29, 2023 07:30:00"
+                }],
+                "isMT":false, 
+                "isMedic":true, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Israel Yurovits",
+                "commanderTimes": [{
+                    "from": "December 27, 2023 22:30:00",
+                    "until": "December 28, 2023 07:30:00"
+                },
+                {
+                    "from": "December 28, 2023 22:30:00",
+                    "until": "December 29, 2023 07:30:00"
+                }],
+                "isMT":false, 
+                "isMedic":true, 
+                "crew":"9", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Arik Rabinovich",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[
+                            ]
+            },
+
+
+            { 
+                "name":"Boris Gertsman",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Yuval Netser",
+                "commanderTimes": [{
+                    "from":"January 20, 2023 10:00:00",
+                    "until":"December 13, 2025 13:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2024 10:00:00"
+                                }
+                            ]
+            },
+            { 
+                "name":"Tal Nahmani",
+                "commanderTimes": [],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[
+                            ]
+            },
+            { 
+                "name":"Gilad Tsadok",
+                "commanderTimes": [{
+                    "from":"January 20, 2023 10:00:00",
+                    "until":"December 13, 2025 13:00:00"
+                }],
+                "isMT":false, 
+                "isMedic":false, 
+                "crew":"9", 
+                "presentDates":[{
+                                    "from": "December 13, 2023 13:00:00",
+                                    "until": "January 20, 2025 10:00:00"
                                 }
                             ]
             }
@@ -316,81 +896,144 @@
             "solela":
                 [
                     {
-                        "names":["Hen"],
-                        "time":"December 21, 2023 10:30:00"
+                        "names":["Itamar Ben Ami"],
+                        "time":"December 25, 2023 13:30:00"
                     },
                     {
-                        "names":["Israel"],
-                        "time":"December 21, 2023 12:00:00"
+                        "names":["Oded Peretz"],
+                        "time":"December 25, 2023 15:00:00"
                     },
                     {
-                        "names":["Arik"],
-                        "time":"December 21, 2023 13:30:00"
+                        "names":["Shalev Ben Moshe"],
+                        "time":"December 25, 2023 16:30:00"
                     },
                     {
-                        "names":["Reuven Priente"],
-                        "time":"December 21, 2023 15:00:00"
+                        "names":["Itay Hefets"],
+                        "time":"December 25, 2023 18:00:00"
                     },
                     {
-                        "names":["Volitski"],
-                        "time":"December 21, 2023 16:30:00"
+                        "names":["Nir Shlomovits"],
+                        "time":"December 25, 2023 19:30:00"
                     },
                     {
-                        "names":["Ron Yoffe"],
-                        "time":"December 21, 2023 18:00:00"
+                        "names":["Yonatan Tsemah","Ohad Kabareti"],
+                        "time":"December 25, 2023 21:00:00"
                     },
                     {
-                        "names":["Avihai"],
-                        "time":"December 21, 2023 19:30:00"
+                        "names":["Ronen Meri", "Eliyahu Kraiter"],
+                        "time":"December 25, 2023 22:30:00"
                     },
                     {
-                        "names":["Raiffer", "Nosatski"],
-                        "time":"December 21, 2023 21:00:00"
+                        "names":["Yair Ben Hemo", "Yair Volitski"],
+                        "time":"December 26, 2023 00:00:00"
                     },
                     {
-                        "names":["Yemilian","Hanan"],
-                        "time":"December 21, 2023 22:30:00"
+                        "names":["Daniel Vaille","Shay Nosatski"],
+                        "time":"December 26, 2023 01:20:00"
                     },
                     {
-                        "names":["Zaslevsky", "Sheshar"],
-                        "time":"December 22, 2023 00:00:00"
+                        "names":["Omri Soffer", "Eitan Raiffer"],
+                        "time":"December 26, 2023 03:00:00"
                     },
                     {
-                        "names":["Vaknin","Amira"],
-                        "time":"December 22, 2023 01:30:00"
+                        "names":["Avihay Cohen","Nahar Cohen"],
+                        "time":"December 26, 2023 04:30:00"
                     },
                     {
-                        "names":["Daniel Vaille","Sofer"],
-                        "time":"December 22, 2023 03:00:00"
+                        "names":["Idan Zaslevski"],
+                        "time":"December 26, 2023 06:00:00"
                     },
                     {
-                        "names":["Ben Hemo", "Uzan"],
-                        "time":"December 22, 2023 04:30:00"
+                        "names":["Yemilian Solnetsov"],
+                        "time":"December 26, 2023 07:30:00"
                     },
                     {
-                        "names":["Kraiter"],
-                        "time":"December 22, 2023 06:00:00"
+                        "names":["Yair Vaknin"],
+                        "time":"December 26, 2023 09:00:00"
                     },
                     {
-                        "names":["Doron"],
-                        "time":"December 22, 2023 07:30:00"
+                        "names":["Erel Manor"],
+                        "time":"December 26, 2023 12:00:00"
                     },
                     {
-                        "names":["Nahar"],
-                        "time":"December 22, 2023 09:00:00"
+                        "names":["Amitay Franko"],
+                        "time":"December 26, 2023 15:00:00"
                     },
                     {
-                        "names":["Yargan"],
-                        "time":"December 22, 2023 10:30:00"
+                        "names":["Max Brener"],
+                        "time":"December 26, 2023 18:00:00"
                     },
                     {
-                        "names":["Fresburger"],
-                        "time":"December 22, 2023 12:00:00"
+                        "names":["Idan Hason", "Yuri Koifman"],
+                        "time":"December 26, 2023 21:00:00"
+                    },
+                    {
+                        "names":["Yotam Eliya", "Yonatan Brog"],
+                        "time":"December 27, 2023 00:00:00"
+                    },
+                    {
+                        "names":["Nadav Dekel", "Tal Zikri"],
+                        "time":"December 27, 2023 03:00:00"
+                    },
+                    {
+                        "names":["Adir Uzan"],
+                        "time":"December 27, 2023 06:00:00"
+                    },
+                    {
+                        "names":["Shalev Ben Moshe"],
+                        "time":"December 27, 2023 09:00:00"
+                    },
+                    {
+                        "names":["Erel Manor"],
+                        "time":"December 27, 2023 10:30:00"
+                    },
+                    {
+                        "names":["Nir Shlomovits"],
+                        "time":"December 27, 2023 12:00:00"
+                    },
+                    {
+                        "names":["Adir Uzan"],
+                        "time":"December 27, 2023 13:30:00"
+                    },
+                    {
+                        "names":["Max Brener"],
+                        "time":"December 27, 2023 15:00:00"
                     }
                 ],
             "shinGimel":
                     [
-                        
+                        {
+                            "names":["Reuven Prientte"],
+                            "time":"December 26, 2023 09:00:00"
+                        },
+                        {
+                            "names":["Itamar Ben Ami"],
+                            "time":"December 26, 2023 12:00:00"
+                        },
+                        {
+                            "names":["Daniel Cohen Tov"],
+                            "time":"December 26, 2023 15:00:00"
+                        },
+                        {
+                            "names":["Eliezer Koplovich"],
+                            "time":"December 26, 2023 18:00:00"
+                        },
+                        {
+                            "names":["Rotem Melamed"],
+                            "time":"December 26, 2023 21:00:00"
+                        },
+                        {
+                            "names":["Tal Amram"],
+                            "time":"December 27, 2023 00:00:00"
+                        },
+                        {
+                            "names":["Yarden Tsefler"],
+                            "time":"December 27, 2023 03:00:00"
+                        },
+                        {
+                            "names":["Itay Hefets"],
+                            "time":"December 27, 2023 06:00:00"
+                        } 
                     ]
         }
     
